@@ -6,24 +6,83 @@
   <title>Photos — KashiFrame Studios</title>
   <link rel="stylesheet" href="https://varanasi-software-junction.github.io/blogger/blogger-assets/crx_styles_v1.css">
   <style>
-    :root{--saffron:#b7410e;--bg:#fff;--muted:#666}
+    :root{
+      --saffron:#b7410e;
+      --bg:#fff;
+      --muted:#666;
+      --row-gap:48px;
+    }
     html,body{height:100%;margin:0;font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:#222;background:#fff}
     header{background:linear-gradient(135deg,#ffecd2,#fcb69f);padding:18px 16px;box-shadow:0 6px 20px rgba(0,0,0,0.05)}
     .container{max-width:1300px;margin:24px auto;padding:0 16px}
     .back{display:inline-block;margin-bottom:10px;color:var(--saffron);text-decoration:none}
     h1{margin:6px 0 8px}
 
-    /* Layout for rows */
-    .gallery-section{margin-bottom:60px}
-    .row{display:flex;flex-wrap:nowrap;gap:12px;overflow:hidden;justify-content:center}
-    .tile{flex:1;min-width:240px;position:relative;overflow:hidden;border-radius:12px;background:#f6f6f6;cursor:default}
-    .tile img{width:100%;height:100%;object-fit:cover;transition:transform 1.4s ease-in-out}
+    /* Filters */
+    .filters{display:flex;gap:10px;margin:14px 0 22px;flex-wrap:wrap}
+    .chip{padding:8px 12px;border-radius:999px;background:#fff;border:1px solid #eee;cursor:pointer}
+    .chip.active{background:var(--saffron);color:#fff;border-color:var(--saffron)}
+
+    /* Rows / tiles layout */
+    .gallery-section{margin-bottom:var(--row-gap);position:relative}
+    .row{
+      display:flex;
+      gap:12px;
+      align-items:stretch;
+      justify-content:center;
+      transition:
+        transform 700ms cubic-bezier(.22,.9,.32,1),
+        box-shadow 700ms ease,
+        padding 700ms ease;
+      will-change:transform,box-shadow;
+      transform-origin:center top;
+      /* default shallow z so active row can rise above */
+      z-index:10;
+      position:relative;
+    }
+
+    .tile{
+      flex:1 1 240px;
+      min-width:220px;
+      border-radius:12px;
+      overflow:hidden;
+      background:#f6f6f6;
+      transition: transform 700ms cubic-bezier(.22,.9,.32,1), box-shadow 700ms ease;
+      will-change:transform,box-shadow;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+    }
+    .tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 1.4s ease-in-out}
     .tile:hover img{transform:scale(1.06)}
     .tile .meta{position:absolute;left:8px;bottom:8px;background:linear-gradient(180deg,rgba(0,0,0,0.08),rgba(0,0,0,0.35));color:#fff;padding:6px 8px;border-radius:8px;font-size:0.9rem}
 
+    /* Active row behavior: rises to top, slightly enlarges tiles, elevated shadow */
+    .row.active{
+      position:-webkit-sticky; /* Safari */
+      position:sticky;
+      top:24px; /* sticks near the top */
+      transform: translateY(-6vh) scale(1.02);
+      z-index:60;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.18);
+    }
+    .row.active .tile{
+      transform:scale(1.03);
+      box-shadow: 0 26px 48px rgba(0,0,0,0.18);
+    }
+
+    /* small screens: allow wrapping, disable sticky for tiny viewports */
+    @media (max-width:980px){
+      .row{flex-wrap:wrap}
+      .row.active{ transform: translateY(-3vh) scale(1.01); top:12px; }
+      .tile{flex:1 1 calc(50% - 12px)}
+    }
+    @media (max-width:520px){
+      .tile{flex:1 1 100%}
+      .row.active{ position:relative; transform:none; top:auto; } /* sticky doesn't work well on tiny screens */
+    }
+
     footer{margin-top:60px;padding:18px;text-align:center;color:var(--muted)}
 
-    /* EXPANDER cinematic background */
+    /* EXPANDER cinematic background (keeps previous slow timings) */
     .expander {
       position:fixed;
       inset:0;
@@ -47,18 +106,12 @@
     .expander .layer.base  { z-index:1; transition-duration:5s; opacity:0.95; }
     .expander .layer.blur  { z-index:2; filter:blur(16px) saturate(120%); opacity:0.6; transition-duration:5.5s; transform:scale(1.05); }
     .expander .layer.glaze { z-index:3; background-blend-mode:overlay; opacity:0.25; transition-duration:6s; transform:scale(1.12); background-color:rgba(183,65,14,0.18); }
-
     .expander.show .layer.base  { transform:scale(1.02); opacity:1; }
     .expander.show .layer.blur  { transform:scale(1.12); opacity:0.85; }
     .expander.show .layer.glaze { transform:scale(1.18); opacity:0.45; }
 
-    @media(max-width:820px){
-      .row{flex-wrap:wrap}
-      .tile{flex:1 1 calc(50% - 12px)}
-    }
-
     @media (prefers-reduced-motion: reduce){
-      .expander .layer, .tile img { transition:none!important; transform:none!important; filter:none!important; }
+      .expander .layer, .row, .tile img { transition:none!important; transform:none!important; filter:none!important; }
     }
 
     main,header,footer{position:relative;z-index:50}
@@ -69,14 +122,12 @@
     <div class="container">
       <a class="back" href="index.html">← Back to Home</a>
       <h1>Photo Albums</h1>
-      <p style="max-width:820px">Scroll to explore our cinematic photo rows — each frame from the heart of Varanasi.</p>
+      <p style="max-width:820px">Scroll — each row will lift and expand to the top as it becomes the focus.</p>
     </div>
   </header>
 
   <main class="container">
-    <!-- Repeatable gallery blocks -->
     <div id="gallery">
-
       <!-- ROW GROUP 1 -->
       <section class="gallery-section">
         <div class="row">
@@ -143,11 +194,33 @@
         </div>
       </section>
 
-      <!-- Repeat the 3 sections to create depth -->
-      <section class="gallery-section clone"></section>
-      <section class="gallery-section clone"></section>
-      <section class="gallery-section clone"></section>
-      <section class="gallery-section clone"></section>
+      <!-- Repeat the 3 sections to create depth (static copies) -->
+      <section class="gallery-section">
+        <div class="row">
+          <figure class="tile" data-tags="ghats"><img src="pics/0.jpg" alt=""><figcaption class="meta">Ghats — Sunrise</figcaption></figure>
+          <figure class="tile" data-tags="wedding"><img src="pics/1.jpg" alt=""><figcaption class="meta">Wedding — Varanasi</figcaption></figure>
+          <figure class="tile" data-tags="aerial"><img src="pics/2.jpg" alt=""><figcaption class="meta">Aerial — Old City</figcaption></figure>
+          <figure class="tile" data-tags="street"><img src="pics/me.jpg" alt=""><figcaption class="meta">Street — Market</figcaption></figure>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <div class="row">
+          <figure class="tile" data-tags="ghats"><img src="pics/1.jpg" alt=""><figcaption class="meta">Ghats — Bride</figcaption></figure>
+          <figure class="tile" data-tags="aerial"><img src="pics/2.jpg" alt=""><figcaption class="meta">Aerial — Sunset</figcaption></figure>
+          <figure class="tile" data-tags="street"><img src="pics/me.jpg" alt=""><figcaption class="meta">Street — Art</figcaption></figure>
+          <figure class="tile" data-tags="ghats"><img src="pics/0.jpg" alt=""><figcaption class="meta">Ghats — Twilight</figcaption></figure>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <div class="row">
+          <figure class="tile" data-tags="aerial"><img src="pics/2.jpg" alt=""><figcaption class="meta">Aerial — Over Ghats</figcaption></figure>
+          <figure class="tile" data-tags="wedding"><img src="pics/1.jpg" alt=""><figcaption class="meta">Wedding — Lamps</figcaption></figure>
+          <figure class="tile" data-tags="street"><img src="pics/me.jpg" alt=""><figcaption class="meta">Street — Vendors</figcaption></figure>
+          <figure class="tile" data-tags="ghats"><img src="pics/0.jpg" alt=""><figcaption class="meta">Ghats — Reflections</figcaption></figure>
+        </div>
+      </section>
 
     </div>
 
@@ -160,65 +233,90 @@
 
   <script>
   (function(){
-    const gallery=document.getElementById('gallery');
-    const expanderRoot=document.getElementById('expander-root');
+    // elements
+    const rows = Array.from(document.querySelectorAll('.row'));
+    const tiles = Array.from(document.querySelectorAll('.tile'));
+    const expanderRoot = document.getElementById('expander-root');
 
-    // Duplicate rows for repetition dynamically (so clones inherit same layout)
-    const sections=gallery.querySelectorAll('.gallery-section:not(.clone)');
-    const clones=gallery.querySelectorAll('.gallery-section.clone');
-    clones.forEach(c=>{
-      sections.forEach(s=>{
-        c.insertAdjacentHTML('beforebegin',s.outerHTML);
-      });
-    });
-    // Remove placeholder clones
-    clones.forEach(c=>c.remove());
-
-    const tiles=Array.from(document.querySelectorAll('.tile'));
-
-    // Expander
+    // EXPANDER (same behaviour as before)
     function createExpanderForImage(src){
       expanderRoot.innerHTML='';
       const exp=document.createElement('div');
       exp.className='expander';
-      const base=document.createElement('div');
-      base.className='layer base';base.style.backgroundImage=`url("${src}")`;
-      const blur=document.createElement('div');
-      blur.className='layer blur';blur.style.backgroundImage=`url("${src}")`;
-      const glaze=document.createElement('div');
-      glaze.className='layer glaze';glaze.style.backgroundImage=`url("${src}")`;
+      const base=document.createElement('div'); base.className='layer base'; base.style.backgroundImage=`url("${src}")`;
+      const blur=document.createElement('div'); blur.className='layer blur'; blur.style.backgroundImage=`url("${src}")`;
+      const glaze=document.createElement('div'); glaze.className='layer glaze'; glaze.style.backgroundImage=`url("${src}")`;
       exp.append(base,blur,glaze);
       expanderRoot.appendChild(exp);
       requestAnimationFrame(()=>exp.classList.add('show'));
     }
     function removeExpander(){
       const exp=expanderRoot.querySelector('.expander');
-      if(!exp)return;
+      if(!exp) return;
       exp.classList.remove('show');
-      setTimeout(()=>{expanderRoot.innerHTML='';},3000);
+      setTimeout(()=>{ expanderRoot.innerHTML=''; }, 3000);
     }
 
-    // Intersection Observer
-    const io=new IntersectionObserver(entries=>{
-      entries.forEach(entry=>{
-        const tile=entry.target;
-        const img=tile.querySelector('img');
-        if(entry.isIntersecting&&entry.intersectionRatio>0.35){
-          const existing=expanderRoot.querySelector('.expander .layer.base');
-          const src=img.src;
-          if(!existing||existing.style.backgroundImage.indexOf(src)===-1){
+    // Observe tiles for expander
+    const tileObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const img = entry.target.querySelector('img');
+        if (!img) return;
+        if(entry.isIntersecting && entry.intersectionRatio > 0.35){
+          const existing = expanderRoot.querySelector('.expander .layer.base');
+          const src = img.src;
+          if(!existing || existing.style.backgroundImage.indexOf(src) === -1){
             createExpanderForImage(src);
           }
-        }else{
-          const still=Array.from(tiles).some(t=>{
-            const r=t.getBoundingClientRect();
-            return r.top<(window.innerHeight*0.8)&&r.bottom>(window.innerHeight*0.2);
+        } else {
+          // if no other tile sufficiently visible, remove
+          const still = tiles.some(t => {
+            const r = t.getBoundingClientRect();
+            return r.top < (window.innerHeight * 0.8) && r.bottom > (window.innerHeight * 0.2);
           });
-          if(!still)removeExpander();
+          if(!still) removeExpander();
         }
       });
-    },{threshold:[0.05,0.35,0.6]});
-    tiles.forEach(t=>io.observe(t));
+    }, { threshold: [0.05, 0.35, 0.6] });
+    tiles.forEach(t => tileObserver.observe(t));
+
+    // ROW observer: make row active when its center is near viewport center
+    // We want only one active row at a time.
+    const rowObserver = new IntersectionObserver((entries) => {
+      // entries comes unordered; sort by intersectionRatio desc so the most visible wins
+      const visible = entries.filter(e => e.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio);
+      // remove active from all rows first (we'll set active for the top candidate only)
+      rows.forEach(r => r.classList.remove('active'));
+      if(visible.length > 0){
+        const best = visible[0].target;
+        best.classList.add('active');
+      }
+    }, {
+      root: null,
+      rootMargin: '0px',
+      threshold: [0.2, 0.45, 0.6] // pick thresholds that represent "in focus"
+    });
+
+    rows.forEach(r => rowObserver.observe(r));
+
+    // Accessibility: Respect reduced motion (also re-check if user changes preference)
+    function handleReducedMotionChange(){
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        // remove transforms for sticky rise
+        rows.forEach(r => r.classList.remove('active'));
+        // stop observers
+        tileObserver.disconnect();
+        rowObserver.disconnect();
+      } else {
+        // re-observe
+        tiles.forEach(t => tileObserver.observe(t));
+        rows.forEach(r => rowObserver.observe(r));
+      }
+    }
+    window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', handleReducedMotionChange);
+    // initial check
+    handleReducedMotionChange();
+
   })();
   </script>
 </body>
