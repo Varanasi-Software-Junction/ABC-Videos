@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://varanasi-software-junction.github.io/blogger/blogger-assets/crx_styles_v1.css">
   <style>
     :root{--saffron:#b7410e;--bg:#fff;--muted:#666}
-    html,body{height:100%;margin:0;font-family:"Poppins",system-ui, -apple-system, "Segoe UI", Roboto, Arial;color:#222;background:linear-gradient(180deg,#fff,#fff)}
+    html,body{height:100%;margin:0;font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:#222;background:linear-gradient(180deg,#fff,#fff)}
     header{background:linear-gradient(135deg,#ffecd2,#fcb69f);padding:18px 16px;box-shadow:0 6px 20px rgba(0,0,0,0.05)}
     .container{max-width:1200px;margin:24px auto;padding:0 16px}
     .back{display:inline-block;margin-bottom:10px;color:var(--saffron);text-decoration:none}
@@ -20,8 +20,8 @@
 
     /* Gallery grid */
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
-    .tile{position:relative;overflow:hidden;border-radius:10px;background:#f6f6f6;cursor:zoom-in}
-    .tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s ease}
+    .tile{position:relative;overflow:hidden;border-radius:10px;background:#f6f6f6;cursor:zoom-in;min-height:140px}
+    .tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 1.4s ease-in-out}
     .tile:hover img{transform:scale(1.06)}
     .tile .meta{position:absolute;left:8px;bottom:8px;background:linear-gradient(180deg,rgba(0,0,0,0.08),rgba(0,0,0,0.35));color:#fff;padding:6px 8px;border-radius:8px;font-size:0.9rem}
 
@@ -35,10 +35,44 @@
     .lightbox .controls{display:flex;gap:10px}
     .icon-btn{background:rgba(255,255,255,0.12);border:none;color:#fff;padding:10px;border-radius:8px;cursor:pointer}
 
-    /* Responsive tweaks */
     @media(max-width:820px){.lightbox .panel{flex-direction:column}.lightbox img{max-width:100%}.lightbox .side{width:100%}}
 
     footer{margin-top:28px;padding:18px;text-align:center;color:var(--muted)}
+
+    /* EXPANDER: slow cinematic reveal */
+    .expander {
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:40;
+      display:block;
+      overflow:hidden;
+      will-change:opacity,transform;
+    }
+    .expander .layer {
+      position:absolute;
+      inset:0;
+      background-position:center;
+      background-size:cover;
+      transform-origin:center;
+      transition:transform 5s cubic-bezier(.22,.9,.32,1), opacity 4.8s ease-in-out;
+      will-change:transform,opacity;
+      opacity:0;
+      filter:none;
+    }
+    .expander .layer.base  { z-index:1; transition-duration:5s; opacity:0.95; }
+    .expander .layer.blur  { z-index:2; filter:blur(16px) saturate(120%); opacity:0.6; transition-duration:5.5s; transform:scale(1.05); }
+    .expander .layer.glaze { z-index:3; background-blend-mode:overlay; opacity:0.25; transition-duration:6s; transform:scale(1.12); background-color:rgba(183,65,14,0.18); }
+
+    .expander.show .layer.base  { transform:scale(1.02); opacity:1; }
+    .expander.show .layer.blur  { transform:scale(1.12); opacity:0.85; }
+    .expander.show .layer.glaze { transform:scale(1.18); opacity:0.45; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .expander .layer, .tile img { transition:none !important; transform:none !important; filter:none !important; }
+    }
+
+    main,header,footer{position:relative;z-index:50}
   </style>
 </head>
 <body>
@@ -50,7 +84,7 @@
     </div>
   </header>
 
-  <main class="container">
+  <main class="container" id="main">
     <div class="filters" role="tablist" aria-label="Photo categories">
       <button class="chip active" data-filter="*">All</button>
       <button class="chip" data-filter="ghats">Ghats</button>
@@ -59,8 +93,7 @@
       <button class="chip" data-filter="street">Street</button>
     </div>
 
-    <div class="grid" id="gallery">
-      <!-- Example tiles: replace src with your real images under assets/photos/ -->
+    <div class="grid" id="gallery" aria-live="polite">
       <figure class="tile" data-tags="ghats street">
         <img loading="lazy" src="pics/0.jpg" alt="Sunrise at the ghats with boats">
         <figcaption class="meta">Ghats — Sunrise</figcaption>
@@ -81,7 +114,7 @@
         <figcaption class="meta">Street — Market</figcaption>
       </figure>
 
-      <figure class="tile" data-tags="ghats wedding">
+      <figure class="tile" data-tags="ghats weddings">
         <img loading="lazy" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'><rect width='100%25' height='100%25' fill='%23fdeee6'/><text x='50%25' y='50%25' font-size='36' text-anchor='middle' fill='%23333' font-family='Verdana,Arial'>Placeholder%20%E2%80%94%20Bride</text></svg>" alt="Bride walking near the ghats">
         <figcaption class="meta">Ghats — Bride</figcaption>
       </figure>
@@ -90,16 +123,15 @@
         <img loading="lazy" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'><rect width='100%25' height='100%25' fill='%23fff3e8'/><text x='50%25' y='50%25' font-size='36' text-anchor='middle' fill='%23333' font-family='Verdana,Arial'>Placeholder%20%E2%80%94%20Sunset</text></svg>" alt="Sunset silhouette over the river">
         <figcaption class="meta">Aerial — Sunset</figcaption>
       </figure>
-
     </div>
 
-    <div class="lightbox" id="lightbox" role="dialog" aria-hidden="true">
-      <div class="panel">
+    <div class="lightbox" id="lightbox" role="dialog" aria-hidden="true" aria-modal="true">
+      <div class="panel" role="document">
         <img id="lb-image" src="" alt="Expanded photo">
         <div class="side">
           <h3 id="lb-title">Title</h3>
           <p id="lb-desc">Description and details about the image.</p>
-          <div class="controls">
+          <div class="controls" role="toolbar" aria-label="Lightbox controls">
             <button id="prev" class="icon-btn" aria-label="Previous">◀</button>
             <button id="next" class="icon-btn" aria-label="Next">▶</button>
             <a id="download" class="icon-btn" role="button" aria-label="Download" download>⬇</a>
@@ -115,102 +147,147 @@
     </footer>
   </main>
 
+  <div id="expander-root" aria-hidden="true"></div>
+
   <script>
-    // Lightweight gallery + filter + lightbox
-    (function(){
-      var gallery = document.getElementById('gallery');
-      var tiles = Array.prototype.slice.call(gallery.querySelectorAll('.tile'));
-      var filters = document.querySelectorAll('.chip');
-      var lb = document.getElementById('lightbox');
-      var lbImg = document.getElementById('lb-image');
-      var lbTitle = document.getElementById('lb-title');
-      var lbDesc = document.getElementById('lb-desc');
-      var download = document.getElementById('download');
-      var currentIndex = -1;
+  (function(){
+    const gallery=document.getElementById('gallery');
+    const tiles=Array.from(gallery.querySelectorAll('.tile'));
+    const filters=Array.from(document.querySelectorAll('.chip'));
+    const lb=document.getElementById('lightbox');
+    const lbImg=document.getElementById('lb-image');
+    const lbTitle=document.getElementById('lb-title');
+    const lbDesc=document.getElementById('lb-desc');
+    const download=document.getElementById('download');
+    const expanderRoot=document.getElementById('expander-root');
+    let currentIndex=-1;
 
-      function showFilter(tag){
-        tiles.forEach(function(t){
-          var tags = t.getAttribute('data-tags') || '';
-          if(tag === '*' || tags.split(/\s+/).indexOf(tag) !== -1){ t.style.display = ''; }
-          else { t.style.display = 'none'; }
-        });
+    function showFilter(tag){
+      tiles.forEach(t=>{
+        const tags=(t.getAttribute('data-tags')||'').split(/\s+/).filter(Boolean);
+        t.style.display=(tag==='*'||tags.includes(tag))?'':'none';
+      });
+    }
+    filters.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        filters.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        showFilter(btn.getAttribute('data-filter'));
+      });
+    });
+
+    function visibleTiles(){return tiles.filter(t=>t.style.display!=='none');}
+
+    function openLightbox(index){
+      const tile=tiles[index];
+      if(!tile)return;
+      const img=tile.querySelector('img');
+      lbImg.src=img.src;
+      lbImg.alt=img.alt||'';
+      lbTitle.textContent=tile.querySelector('figcaption')?tile.querySelector('figcaption').textContent:'';
+      lbDesc.textContent=img.alt||'';
+      const filename=(img.src.split('/').pop()||'photo').split('?')[0];
+      download.href=img.src;
+      download.setAttribute('download',filename);
+      lb.classList.add('open');lb.setAttribute('aria-hidden','false');
+      currentIndex=index;
+      setTimeout(()=>document.getElementById('close').focus(),80);
+    }
+    function closeLightbox(){
+      lb.classList.remove('open');lb.setAttribute('aria-hidden','true');
+      lbImg.src='';currentIndex=-1;
+    }
+
+    tiles.forEach((t,i)=>{
+      t.setAttribute('tabindex','0');
+      t.addEventListener('click',()=>{
+        const v=visibleTiles();
+        const vIndex=v.indexOf(t);
+        const globalIndex=tiles.indexOf(v[vIndex]);
+        openLightbox(globalIndex);
+      });
+      t.addEventListener('keydown',e=>{
+        if(e.key==='Enter'||e.key===' '){e.preventDefault();t.click();}
+      });
+    });
+
+    document.getElementById('close').addEventListener('click',closeLightbox);
+    document.getElementById('prev').addEventListener('click',()=>{
+      const v=visibleTiles();if(!v.length)return;
+      const vPos=v.indexOf(tiles[currentIndex]);
+      const nextPos=(vPos-1+v.length)%v.length;
+      openLightbox(tiles.indexOf(v[nextPos]));
+    });
+    document.getElementById('next').addEventListener('click',()=>{
+      const v=visibleTiles();if(!v.length)return;
+      const vPos=v.indexOf(tiles[currentIndex]);
+      const nextPos=(vPos+1)%v.length;
+      openLightbox(tiles.indexOf(v[nextPos]));
+    });
+
+    document.addEventListener('keydown',e=>{
+      if(lb.classList.contains('open')){
+        if(e.key==='Escape')closeLightbox();
+        else if(e.key==='ArrowLeft')document.getElementById('prev').click();
+        else if(e.key==='ArrowRight')document.getElementById('next').click();
       }
+    });
+    lb.addEventListener('click',e=>{if(e.target===lb)closeLightbox();});
 
-      // Filter buttons
-      filters.forEach(function(btn){
-        btn.addEventListener('click', function(){
-          filters.forEach(function(b){b.classList.remove('active');});
-          btn.classList.add('active');
-          showFilter(btn.getAttribute('data-filter'));
-        });
-      });
+    function createExpanderForImage(src){
+      expanderRoot.innerHTML='';
+      const exp=document.createElement('div');
+      exp.className='expander';
+      const base=document.createElement('div');
+      base.className='layer base';base.style.backgroundImage=`url("${src}")`;
+      const blur=document.createElement('div');
+      blur.className='layer blur';blur.style.backgroundImage=`url("${src}")`;
+      const glaze=document.createElement('div');
+      glaze.className='layer glaze';glaze.style.backgroundImage=`url("${src}")`;
+      exp.append(base,blur,glaze);
+      expanderRoot.appendChild(exp);
+      requestAnimationFrame(()=>exp.classList.add('show'));
+      return exp;
+    }
+    function removeExpander(){
+      const exp=expanderRoot.querySelector('.expander');
+      if(!exp)return;
+      exp.classList.remove('show');
+      setTimeout(()=>{expanderRoot.innerHTML='';},3000); // longer fade-out
+    }
 
-      // Build a flat array of visible tiles for navigation
-      function visibleTiles(){ return tiles.filter(function(t){ return t.style.display !== 'none'; }); }
-
-      // Open lightbox for a tile index in visibleTiles()
-      function openLightboxByVisibleIndex(vIndex){
-        var v = visibleTiles();
-        if(v.length === 0) return;
-        currentIndex = tiles.indexOf(v[vIndex]);
-        openLightbox(currentIndex);
-      }
-
-      function openLightbox(index){
-        var tile = tiles[index];
-        if(!tile) return;
-        var img = tile.querySelector('img');
-        lbImg.src = img.src;
-        lbImg.alt = img.alt || '';
-        lbTitle.textContent = tile.querySelector('figcaption') ? tile.querySelector('figcaption').textContent : '';
-        lbDesc.textContent = img.alt || '';
-        download.href = img.src;
-        download.setAttribute('download', img.src.split('/').pop());
-        lb.classList.add('open'); lb.setAttribute('aria-hidden','false');
-      }
-
-      function closeLightbox(){ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); }
-
-      // Click on tiles
-      tiles.forEach(function(t,i){
-        t.addEventListener('click', function(){
-          // Find index among visible tiles
-          var v = visibleTiles();
-          var vIndex = v.indexOf(t);
-          openLightboxByVisibleIndex(vIndex);
-        });
-      });
-
-      // Lightbox controls
-      document.getElementById('close').addEventListener('click', closeLightbox);
-      document.getElementById('prev').addEventListener('click', function(){
-        var v = visibleTiles();
-        var vPos = v.indexOf(tiles[currentIndex]);
-        var nextPos = (vPos - 1 + v.length) % v.length;
-        openLightboxByVisibleIndex(nextPos);
-      });
-      document.getElementById('next').addEventListener('click', function(){
-        var v = visibleTiles();
-        var vPos = v.indexOf(tiles[currentIndex]);
-        var nextPos = (vPos + 1) % v.length;
-        openLightboxByVisibleIndex(nextPos);
-      });
-
-      // Keyboard navigation
-      document.addEventListener('keydown', function(e){
-        if(lb.classList.contains('open')){
-          if(e.key === 'Escape') closeLightbox();
-          else if(e.key === 'ArrowLeft'){ document.getElementById('prev').click(); }
-          else if(e.key === 'ArrowRight'){ document.getElementById('next').click(); }
+    const io=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        const tile=entry.target;
+        const img=tile.querySelector('img');
+        if(entry.isIntersecting&&entry.intersectionRatio>0.35){
+          const existing=expanderRoot.querySelector('.expander .layer.base');
+          const src=img.src;
+          if(!existing||existing.style.backgroundImage.indexOf(src)===-1){
+            createExpanderForImage(src);
+          }
+        }else{
+          const still=Array.from(tiles).some(t=>{
+            const r=t.getBoundingClientRect();
+            return r.top<(window.innerHeight*0.8)&&r.bottom>(window.innerHeight*0.2);
+          });
+          if(!still)removeExpander();
         }
       });
+    },{threshold:[0.05,0.35,0.6]});
+    tiles.forEach(t=>io.observe(t));
 
-      // click outside image to close
-      lb.addEventListener('click', function(e){ if(e.target === lb) closeLightbox(); });
+    gallery.addEventListener('focusin',e=>{
+      const tile=e.target.closest('.tile');
+      if(tile){
+        const img=tile.querySelector('img');
+        createExpanderForImage(img.src);
+      }
+    });
+    gallery.addEventListener('focusout',()=>{removeExpander();});
 
-      // init
-      showFilter('*');
-    })();
+    showFilter('*');
+  })();
   </script>
 </body>
 </html>
