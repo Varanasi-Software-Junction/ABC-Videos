@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Intersection Observer Demo</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .spacer {
+            height: 100vh;
+            background: #f0f0f0;
+        }
+
+        .box {
+            margin: 50px auto;
+            width: 80%;
+            height: 150px;
+            background: #ccc;
+            transition: background 0.5s ease;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .visible {
+            background: #4caf50;
+            color: white;
+            border-style: ridge;
+            border-width: 10px;
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="spacer">Scroll down to see boxes...</div>
+    <div id="b1" class="box">
+        <video width="320" id="vb1" controls>
+            <source src="videos/0.mp4" type="">
+
+            Your browser does not support the video tag.
+        </video>
+        Box 1
+    </div>
+    <div id="b2" class="box">Box 2</div>
+    <div id="b3" class="box">Box 3</div>
+    <div id="b4" class="box">Box 4</div>
+    <div class="spacer"></div>
+
+    <script>
+
+        const boxes = document.querySelectorAll('.box');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+
+
+
+                    entry.target.classList.add('visible');
+                    console.log('Visible:', entry.target.id);
+                } else {
+
+                    entry.target.classList.remove('visible');
+                }
+            });
+            console.log("Current visible box id:", currentid);
+        }, {
+            threshold: 1
+        });
+
+        boxes.forEach(box => observer.observe(box));
+    </script>
+</body>
+
+</html>

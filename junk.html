@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pure Cinema — Vertical Video Showcase</title>
+  <meta name="description" content="Six-video vertical showcase — 0.webm, 0.mp4, 1.webm, 1.mp4, 2.webm, 2.mp4" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#fff;
+      --ink:#0f172a;
+      --muted:#6b7280;
+      --accent:#ffb703;      /* saffron */
+      --accent-dark:#d48a00;
+      --card:#fbfbfb;
+      --radius:12px;
+      --maxw:1100px;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    }
+
+    /* Page layout */
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#fff,#fcfbf8);color:var(--ink);-webkit-font-smoothing:antialiased;}
+    .wrap{max-width:var(--maxw);margin:0 auto;padding:28px;}
+
+    /* Header */
+    header.hero{
+      display:flex;flex-direction:column;gap:14px;align-items:flex-start;padding:36px;border-radius:16px;
+      background:linear-gradient(180deg,rgba(255,183,3,0.06),rgba(255,255,255,0.02));
+      margin-bottom:28px;
+      box-shadow:0 10px 30px rgba(2,6,23,0.04);
+    }
+    header .brand{display:flex;gap:14px;align-items:center;}
+    .logo{width:64px;height:64px;border-radius:12px;display:grid;place-items:center;font-weight:800;
+          background:linear-gradient(135deg,var(--accent),var(--accent-dark)); color:#082032; font-family:"Playfair Display",serif;}
+    header h1{margin:0;font-family:"Playfair Display",serif;font-size:clamp(1.6rem,3.5vw,2.6rem);}
+    header p.lead{margin:0;color:var(--muted);max-width:70ch;font-size:1.03rem;}
+
+    /* Video cards */
+    .videos { display:flex;flex-direction:column; gap:18px; margin-bottom:36px; }
+    .video-card{
+      background:var(--card); border-radius:var(--radius); padding:14px; display:flex; flex-direction:column; gap:10px;
+      box-shadow:0 10px 30px rgba(2,6,23,0.03); border:1px solid rgba(2,6,23,0.03);
+    }
+    .video-card header{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .video-title{font-weight:700;}
+    .video-desc{color:var(--muted);font-size:0.95rem;margin:0;}
+    .video-el{width:100%;border-radius:10px;overflow:hidden;background:#000;}
+    video{width:100%;height:auto;display:block;background:#000;}
+
+    /* Summary & CTA */
+    .summary{padding:20px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff);box-shadow:0 8px 20px rgba(2,6,23,0.02);display:flex;gap:18px;align-items:center;justify-content:space-between;}
+    .summary .text{max-width:70%;}
+    .summary h3{margin:0;font-family:"Playfair Display",serif;}
+    .summary p{margin:6px 0 0 0;color:var(--muted);}
+    .cta-btn{background:var(--accent);border:none;padding:12px 16px;border-radius:10px;font-weight:800;color:#082032;cursor:pointer;box-shadow:0 12px 36px rgba(255,183,3,0.12);}
+
+    /* Contact form (bottom) */
+    .contact{margin-top:28px;padding:18px;border-radius:12px;background:#fff;border:1px solid rgba(2,6,23,0.03);}
+    label{display:block;font-weight:600;margin-top:10px;margin-bottom:6px;}
+    input,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(2,6,23,0.06);font-size:0.95rem;}
+    .contact .row{display:flex;gap:12px;}
+    .contact .row > *{flex:1;}
+
+    /* Utilities */
+    .muted{color:var(--muted);}
+    .small{font-size:0.9rem;color:var(--muted);}
+    @media (max-width:720px){
+      .summary{flex-direction:column;align-items:flex-start;}
+      .summary .text{max-width:100%;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Header -->
+    <header class="hero" id="top">
+      <div class="brand">
+        <div class="logo">PC</div>
+        <div>
+          <div style="font-weight:800">PURE CINEMA</div>
+          <div class="small muted">Vertical video showcase</div>
+        </div>
+      </div>
+
+      <h1>Six-video vertical showcase</h1>
+      <p class="lead">Below are your six test videos placed one after the other vertically. Click play on any video to start it. Use the CTA at the bottom to get in touch about a shoot, color grade, or edit.</p>
+    </header>
+
+    <!-- Videos list -->
+    <section class="videos" aria-label="Video list">
+
+      <!-- Video 0.webm -->
+      <article class="video-card" id="card-0-webm">
+        <header>
+          <div>
+            <div class="video-title">0.webm</div>
+            <div class="video-desc small muted">Test clip — webm format. Replace this description with project-specific notes.</div>
+          </div>
+          <div class="small muted">Duration: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/0.webm" type="video/webm">
+            <source src="videos/0.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+      <!-- Video 0.mp4 -->
+      <article class="video-card" id="card-0-mp4">
+        <header>
+          <div>
+            <div class="video-title">0.mp4</div>
+            <div class="video-desc small muted">MP4 copy of clip 0 — good for broad compatibility.</div>
+          </div>
+          <div class="small muted">Resolution: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/0.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+      <!-- Video 1.webm -->
+      <article class="video-card" id="card-1-webm">
+        <header>
+          <div>
+            <div class="video-title">1.webm</div>
+            <div class="video-desc small muted">WebM version of clip 1.</div>
+          </div>
+          <div class="small muted">Notes: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/1.webm" type="video/webm">
+            <source src="videos/1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+      <!-- Video 1.mp4 -->
+      <article class="video-card" id="card-1-mp4">
+        <header>
+          <div>
+            <div class="video-title">1.mp4</div>
+            <div class="video-desc small muted">MP4 variant of clip 1.</div>
+          </div>
+          <div class="small muted">Frame rate: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+      <!-- Video 2.webm -->
+      <article class="video-card" id="card-2-webm">
+        <header>
+          <div>
+            <div class="video-title">2.webm</div>
+            <div class="video-desc small muted">WebM version of clip 2 — use for testing codecs.</div>
+          </div>
+          <div class="small muted">Codec: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/2.webm" type="video/webm">
+            <source src="videos/2.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+      <!-- Video 2.mp4 -->
+      <article class="video-card" id="card-2-mp4">
+        <header>
+          <div>
+            <div class="video-title">2.mp4</div>
+            <div class="video-desc small muted">MP4 of clip 2 — compatible with older browsers and devices.</div>
+          </div>
+          <div class="small muted">Bitrate: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/2.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- Summary + CTA -->
+    <section class="summary" aria-labelledby="summary-heading">
+      <div class="text">
+        <h3 id="summary-heading">Quick summary</h3>
+        <p class="muted">Six clips shown above for quick review. Pick a clip to play and note timecodes or frames you want graded or cut. If you'd like, we can: color-grade these clips, produce social cuts, or create a cinematic edit.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-end;">
+        <button class="cta-btn" id="ctaContact">Contact to Book a Review</button>
+        <div class="small muted">Or email: <a href="mailto:hello@purecinema.example">hello@purecinema.example</a></div>
+      </div>
+    </section>
+
+    <!-- Contact form (simple stub) -->
+    <section class="contact" id="contactForm" aria-label="Contact form">
+      <h3 style="margin:0 0 8px 0;">Contact / Project brief</h3>
+      <form onsubmit="return false;">
+        <label for="name">Full name</label>
+        <input id="name" name="name" placeholder="Your name" required>
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" required>
+
+        <label for="notes">Notes / Which clip(s) — include timecodes</label>
+        <textarea id="notes" name="notes" rows="4" placeholder="Example: clip 1.mp4 — 00:01:24 to 00:01:42 — please grade shadows"></textarea>
+
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <button class="cta-btn" id="sendBtn">Send request</button>
+          <div class="small muted" id="formStatus">We'll reply within 48 hours.</div>
+        </div>
+      </form>
+    </section>
+
+  </div>
+
+  <script>
+    // Scroll CTA to contact form
+    document.getElementById('ctaContact').addEventListener('click', () => {
+      document.getElementById('contactForm').scrollIntoView({behavior:'smooth', block:'center'});
+    });
+
+    // Simple form "send" simulation - replace with your API
+    const sendBtn = document.getElementById('sendBtn');
+    const formStatus = document.getElementById('formStatus');
+    sendBtn.addEventListener('click', () => {
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+      // simulate network
+      setTimeout(() => {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send request';
+        formStatus.textContent = 'Request sent — we will reply within 48 hours.';
+        // optionally clear fields:
+        document.getElementById('name').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('notes').value = '';
+      }, 900);
+    });
+
+    // Optional: update each card's "Duration" text after metadata loads
+    document.querySelectorAll('.video-el video').forEach((v) => {
+      v.addEventListener('loadedmetadata', () => {
+        const card = v.closest('.video-card');
+        const secs = Math.round(v.duration);
+        const mins = Math.floor(secs/60);
+        const rem = secs % 60;
+        const label = card.querySelector('header > div > .video-desc');
+        // write duration into the small muted area if available
+        const endNote = card.querySelector('header .small');
+        if(endNote) endNote.textContent = `${mins}:${rem.toString().padStart(2,'0')} • ${Math.round(v.duration)}s`;
+      });
+    });
+
+    // Accessibility: pause other videos when one plays
+    document.querySelectorAll('.video-el video').forEach((video) => {
+      video.addEventListener('play', () => {
+        document.querySelectorAll('.video-el video').forEach((other) => {
+          if(other !== video) other.pause();
+        });
+      });
+    });
+  </script>
+</body>
+</html>
