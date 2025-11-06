@@ -19,17 +19,37 @@
 
         .box {
             margin: 50px auto;
-            width: 80%;
-            height: 150px;
+            width: 50%;
+
+
+            opacity: 0.7;
+            /* height: 150px; */
             background: #ccc;
-            transition: background 0.5s ease;
+            /* transition: background 0.5s ease; */
             padding: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
+        @keyframes boxanim {
+            0%{
+                opacity: 0;
+                width:  50%; ;
+            }
+
+            100% {
+                opacity: 1;
+                width: 80%;
+            }
+        }
+
         .visible {
+            animation-name: boxanim;
+            animation-timing-function: ease-out;
+            animation-iteration-count: 1;
+            animation-fill-mode: forwards;
+            animation-duration: 300ms   ;
             background: #4caf50;
             color: white;
             border-style: ridge;
@@ -42,17 +62,79 @@
 <body>
     <div class="spacer">Scroll down to see boxes...</div>
     <div id="b1" class="box">
-        <video width="320" id="vb1" controls>
-            <source src="videos/0.mp4" type="">
 
-            Your browser does not support the video tag.
-        </video>
         Box 1
     </div>
+    <div>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+        A
+
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+
+    </div>
     <div id="b2" class="box">Box 2</div>
+    <div>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+        B
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+    </div>
+
+
     <div id="b3" class="box">Box 3</div>
-    <div id="b4" class="box">Box 4</div>
+    <div>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+        C
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+    </div>
+
+
+
+    <div id="b4" class="box">Box 4
+    </div>
+    <div>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+        D
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+    </div>
+
+
+
+
+
     <div class="spacer"></div>
+
 
     <script>
 
@@ -61,7 +143,7 @@
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-
+                    document.title = entry.target.id + " is visible";
 
 
                     entry.target.classList.add('visible');
@@ -69,11 +151,12 @@
                 } else {
 
                     entry.target.classList.remove('visible');
+                    document.title = "Not visible";
                 }
             });
-            console.log("Current visible box id:", currentid);
+            console.log("Current visible box id:");
         }, {
-            threshold: 1
+            threshold: 0.5
         });
 
         boxes.forEach(box => observer.observe(box));
