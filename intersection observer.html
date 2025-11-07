@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Content Expand-to-Fullscreen — Auto-switch with SVG placeholders</title>
+  <title>Content Expand-to-Fullscreen — Centered Expansion</title>
   <style>
     :root{
       --bg:#fafafa;
@@ -42,10 +42,9 @@
 
     .inner { max-width: 900px; width:100%; display:flex; flex-direction:column; gap:18px; align-items:center; }
 
-    /* SVG placeholder size control */
     .placeholder-svg {
       width: 100%;
-      max-height: 48vh; /* keep SVG visible but not overflow */
+      max-height: 48vh;
       height: auto;
       display: block;
       border-radius: 8px;
@@ -90,7 +89,7 @@
   </style>
 </head>
 <body>
-  <div class="spacer">Scroll down — sections expand to fullscreen when visible. Each section includes an SVG placeholder image.</div>
+  <div class="spacer">Scroll down — sections expand to fullscreen and will be centered in the viewport.</div>
 
   <section class="content" id="c1">
     <div class="inner">
@@ -187,7 +186,7 @@
 
   <div class="spacer"></div>
 
-  <footer class="note">Auto-switch demo with inline SVG placeholders (responsive and accessible).</footer>
+  <footer class="note">Centered expansion: transform-origin set to the element center and translation computed to move the element's center into the viewport center.</footer>
 
   <script>
     (function(){
@@ -209,6 +208,8 @@
         el.style.margin = '0';
         el.style.zIndex = 12000;
         el.classList.add('expanding');
+        // set transform-origin to center so scaling centers on the element center
+        el.style.transformOrigin = '50% 50%';
       }
 
       function restoreElement(el) {
@@ -221,6 +222,7 @@
         el.style.zIndex = '';
         el.style.transform = '';
         el.style.transition = '';
+        el.style.transformOrigin = '';
         el.classList.remove('expanding');
       }
 
@@ -243,6 +245,7 @@
         closeBtn = null;
       }
 
+      // Expand a section — center the section's center in the viewport while scaling it to fullscreen
       function expandContent(section) {
         return new Promise((resolve) => {
           if (isAnimating) { resolve(); return; }
@@ -253,23 +256,32 @@
           const vw = window.innerWidth;
           const vh = window.innerHeight;
 
+          // placeholder to preserve layout
           placeholder = document.createElement('div');
           placeholder.style.width = rect.width + 'px';
           placeholder.style.height = rect.height + 'px';
           placeholder.style.margin = getComputedStyle(section).margin;
           section.parentNode.insertBefore(placeholder, section);
 
+          // fix element at its rect and set transform origin to center
           fixElementAtRect(section, rect);
 
+          // compute scale factors
           const scaleX = vw / rect.width;
           const scaleY = vh / rect.height;
-          const translateX = -rect.left;
-          const translateY = -rect.top;
 
+          // compute translation so the section's center moves to viewport center
+          const elemCenterX = rect.left + rect.width / 2;
+          const elemCenterY = rect.top + rect.height / 2;
+          const translateX = (vw / 2) - elemCenterX;
+          const translateY = (vh / 2) - elemCenterY;
+
+          // set transition & animate
           section.style.transition = `transform ${animDuration}ms cubic-bezier(.22,.9,.35,1)`;
           section.getBoundingClientRect();
 
           if (prefersReduced) {
+            // jump to final transform (no animation)
             section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
             isAnimating = false;
             currentlyExpanded = section;
@@ -297,26 +309,20 @@
           }, { once: true });
 
           requestAnimationFrame(() => {
+            // translate center -> center, and scale to cover viewport
             section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
             if (closeBtn) closeBtn.focus();
           });
         });
       }
 
+      // Shrink current expanded section back to its placeholder (animate to transform: none)
       function shrinkCurrent() {
         return new Promise((resolve) => {
           if (!currentlyExpanded) { resolve(); return; }
           if (isAnimating) { resolve(); return; }
           isAnimating = true;
           const section = currentlyExpanded;
-          const rect = placeholder.getBoundingClientRect();
-          const vw = window.innerWidth;
-          const vh = window.innerHeight;
-
-          const scaleX = rect.width / vw;
-          const scaleY = rect.height / vh;
-          const translateX = rect.left;
-          const translateY = rect.top;
 
           section.style.transition = `transform ${animDuration}ms cubic-bezier(.22,.9,.35,1)`;
 
@@ -333,6 +339,7 @@
 
           function onEnd() {
             section.removeEventListener('transitionend', onEnd);
+            // restore to document flow
             restoreElement(section);
             if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
             placeholder = null;
@@ -354,8 +361,9 @@
             onEnd();
           }, { once: true });
 
+          // animate back to identity (no transform) — because we used center-origin, this returns nicely centered -> original
           requestAnimationFrame(() => {
-            section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+            section.style.transform = `none`;
           });
         });
       }
@@ -400,14 +408,18 @@
 
       window.addEventListener('resize', () => {
         if (!currentlyExpanded) return;
+        // recompute transform so the center remains centered on resize
         const section = currentlyExpanded;
-        const rect = placeholder ? placeholder.getBoundingClientRect() : section.getBoundingClientRect();
+        if (!placeholder) return;
+        const rect = placeholder.getBoundingClientRect();
         const vw = window.innerWidth;
         const vh = window.innerHeight;
         const scaleX = vw / rect.width;
         const scaleY = vh / rect.height;
-        const translateX = -rect.left;
-        const translateY = -rect.top;
+        const elemCenterX = rect.left + rect.width / 2;
+        const elemCenterY = rect.top + rect.height / 2;
+        const translateX = (vw / 2) - elemCenterX;
+        const translateY = (vh / 2) - elemCenterY;
         section.style.transition = 'transform 0ms';
         section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
       });
