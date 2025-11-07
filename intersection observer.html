@@ -3,173 +3,335 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Intersection Observer Demo</title>
+  <title>Content Expand-to-Fullscreen Demo</title>
   <style>
     :root{
-      --box-bg: #ccc;
-      --box-bg-visible: #4caf50;
-      --box-color-visible: #fff;
-      --box-width: 60%;
-      --box-padding: 18px;
-      --border-size: 8px;
-      --anim-duration: 600ms;
+      --bg:#fafafa;
+      --box-bg:#ddd;
+      --box-highlight:#2a9d8f;
+      --box-color:#111;
+      --anim-duration:520ms;
+      --close-size:44px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background:var(--bg);
+      color:var(--box-color);
     }
 
-    * { box-sizing: border-box; }
-    body {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      margin: 0;
-      background: #f9f9f9;
-      color: #222;
-      line-height: 1.4;
-    }
+    .spacer { height:100vh; display:flex; align-items:center; justify-content:center; color:#666; }
 
-    .spacer { height: 100vh; display:flex; align-items:center; justify-content:center; color:#666; }
-    .content { min-height: 80vh; padding: 40px 10px; display:flex; align-items:center; justify-content:center; }
-
-    /* Boxes */
-    .box {
-      width: var(--box-width);
-      max-width: 900px;
-      margin: 0 auto;
-      padding: var(--box-padding);
-      background: var(--box-bg);
-      opacity: 0.8;
-      color: #111;
-      border-radius: 10px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    /* content sections that will expand */
+    .content {
+      min-height: 60vh;
+      margin: 48px 12px;
       display:flex;
       align-items:center;
       justify-content:center;
+      background: var(--box-bg);
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+      padding: 28px;
       text-align:center;
-      font-size: 1.2rem;
-      /* Use transform/opacity for animation (GPU accelerated) */
-      transform: translateY(30px) scale(.98);
-      opacity: 0;
-      transition: none; /* we'll drive via animation */
-      will-change: transform, opacity;
-      /* border reserved for visible state */
+      font-size: 1.1rem;
+      transition: none;
+      will-change: transform, left, top, width, height;
+      position: relative; /* original flow position */
+      overflow: hidden;
     }
 
-    /* visible state — uses transform + opacity, not width/height changes */
-    .box.visible {
-      animation: boxIn var(--anim-duration) cubic-bezier(.22,.9,.35,1) forwards;
-      background: var(--box-bg-visible);
-      color: var(--box-color-visible);
-      border: solid var(--border-size) rgba(0,0,0,0.08);
+    .content .inner {
+      max-width: 900px;
+      width: 100%;
     }
 
-    @keyframes boxIn {
-      0% {
-        transform: translateY(30px) scale(.98);
-        opacity: 0;
-      }
-      100% {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-      }
+    /* visible "in-place" subtle reveal when intersecting (before/after expansion) */
+    .content.visible {
+      box-shadow: 0 12px 36px rgba(0,0,0,0.10);
+      transform: translateY(0);
     }
 
-    /* Stagger utility when needed (optional) */
-    .box[data-delay="1"] { animation-delay: 80ms; }
-    .box[data-delay="2"] { animation-delay: 160ms; }
-    .box[data-delay="3"] { animation-delay: 240ms; }
+    /* styles applied while element is fixed and expanding */
+    .expanding {
+      border-radius: 10px;
+    }
 
-    /* Reduce motion preference */
+    /* close button (shown while expanded) */
+    .exp-close {
+      position: fixed;
+      right: 18px;
+      top: 18px;
+      width: var(--close-size);
+      height: var(--close-size);
+      border-radius: 8px;
+      border: 0;
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:600;
+      cursor:pointer;
+      z-index: 12001;
+    }
+
+    /* reduced motion */
     @media (prefers-reduced-motion: reduce) {
-      .box, .box.visible {
-        animation: none !important;
-        transform: none !important;
-        opacity: 1 !important;
-      }
+      :root { --anim-duration: 0ms; }
+      .content { transition: none !important; }
     }
 
-    /* Small screens */
-    @media (max-width:700px){
-      :root { --box-width: 92%; --box-padding: 14px; --anim-duration: 450ms; --border-size:6px;}
-      .box { font-size: 1rem; }
-    }
-
-    footer.note { text-align:center; padding:20px; color:#666; font-size:0.9rem; }
+    footer.note { text-align:center; color:#666; padding:18px; font-size:.95rem;}
   </style>
 </head>
 <body>
-  <div class="spacer">Scroll down to see boxes...</div>
+  <div class="spacer">Scroll down — each content section will expand to fill the screen when visible.</div>
 
-  <section class="content">
-    <div id="b1" class="box" data-delay="1">Box 1 — Hello</div>
+  <section class="content" id="c1">
+    <div class="inner">
+      <h2>Section A</h2>
+      <p>Content A — this content will expand to cover the screen when it becomes visible.</p>
+    </div>
   </section>
 
-  <section class="content">
-    <div id="b2" class="box" data-delay="2">Box 2 — More content</div>
+  <section class="content" id="c2">
+    <div class="inner">
+      <h2>Section B</h2>
+      <p>Content B — try scrolling to see the expand animation and then close it.</p>
+    </div>
   </section>
 
-  <section class="content">
-    <div id="b3" class="box" data-delay="3">Box 3 — Even more</div>
+  <section class="content" id="c3">
+    <div class="inner">
+      <h2>Section C</h2>
+      <p>Content C — the real element expands (no clones), and returns to place on close.</p>
+    </div>
   </section>
 
-  <section class="content">
-    <div id="b4" class="box">Box 4 — Final</div>
+  <section class="content" id="c4">
+    <div class="inner">
+      <h2>Section D</h2>
+      <p>Content D — accessible close (Esc) and backdrop click supported.</p>
+    </div>
   </section>
 
   <div class="spacer"></div>
 
-  <footer class="note">Demo improved: transform-based animation, prefers-reduced-motion support, no layout thrash.</footer>
+  <footer class="note">Demo: expanding .content sections to fullscreen using transform + fixed positioning.</footer>
 
   <script>
-    // Options:
-    // threshold: 0.5 -> fire when ~50% visible
-    // rootMargin: '0px 0px -10% 0px' -> treat element as visible a little earlier as it enters viewport.
-    const options = {
-      root: null,
-      rootMargin: '0px 0px -10% 0px',
-      threshold: 0.5
-    };
+    (function(){
+      const contents = document.querySelectorAll('.content');
+      const animDuration = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--anim-duration')) || 520;
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const boxes = document.querySelectorAll('.box');
+      let currentlyExpanded = null;   // the content element currently expanded
+      let placeholder = null;         // DOM placeholder to keep flow while element is fixed
 
-    const observer = new IntersectionObserver((entries, obs) => {
-      // We'll pick the entry with highest intersectionRatio to set the title
-      let bestEntry = null;
-      for (const entry of entries) {
-        const el = entry.target;
-        if (entry.isIntersecting && entry.intersectionRatio >= options.threshold) {
-          // Add visible class to play animation
-          el.classList.add('visible');
-          console.log('Visible:', el.id, 'ratio:', entry.intersectionRatio.toFixed(2));
-          // If you want each box to animate only once, uncomment:
-          // obs.unobserve(el);
+      // Utility: set element to fixed at its current rect
+      function fixElementAtRect(el, rect) {
+        el.style.position = 'fixed';
+        el.style.left = rect.left + 'px';
+        el.style.top = rect.top + 'px';
+        el.style.width = rect.width + 'px';
+        el.style.height = rect.height + 'px';
+        el.style.margin = '0';
+        el.style.zIndex = 12000;
+        el.style.borderRadius = getComputedStyle(el).borderRadius || '12px';
+        el.classList.add('expanding');
+      }
+
+      // Restore element back to original flow (clean inline styles)
+      function restoreElement(el) {
+        el.style.position = '';
+        el.style.left = '';
+        el.style.top = '';
+        el.style.width = '';
+        el.style.height = '';
+        el.style.margin = '';
+        el.style.zIndex = '';
+        el.style.transform = '';
+        el.style.transition = '';
+        el.classList.remove('expanding');
+      }
+
+      // Expand section element to cover the viewport
+      function expandContent(section) {
+        if (currentlyExpanded) return; // only one at a time
+        currentlyExpanded = section;
+
+        const rect = section.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        // create and insert placeholder to preserve layout
+        placeholder = document.createElement('div');
+        placeholder.style.width = rect.width + 'px';
+        placeholder.style.height = rect.height + 'px';
+        placeholder.style.margin = getComputedStyle(section).margin;
+        section.parentNode.insertBefore(placeholder, section);
+
+        // prepare section: fix in place at its rect
+        fixElementAtRect(section, rect);
+
+        // calculate transform needed to scale/translate the fixed element to cover viewport
+        const scaleX = vw / rect.width;
+        const scaleY = vh / rect.height;
+        const translateX = -rect.left;
+        const translateY = -rect.top;
+
+        // set transition for smooth animation
+        // transform applied on the element itself (GPU accelerated)
+        section.style.transition = `transform ${animDuration}ms cubic-bezier(.22,.9,.35,1)`;
+
+        // insert a close button (fixed) — attach only once per expand
+        addCloseButton();
+
+        // force paint then animate
+        section.getBoundingClientRect(); // force reflow
+        if (prefersReduced) {
+          // jump to final state without animation
+          section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
         } else {
-          // If you want repeated enter/exit animations, remove the class on exit:
-          el.classList.remove('visible');
-        }
-
-        // pick the highest intersectionRatio entry for title update
-        if (!bestEntry || (entry.intersectionRatio > bestEntry.intersectionRatio)) {
-          bestEntry = entry;
+          requestAnimationFrame(() => {
+            section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+          });
         }
       }
 
-      if (bestEntry && bestEntry.isIntersecting) {
-        document.title = bestEntry.target.id + ' is visible';
-      } else {
-        document.title = 'Not visible';
+      // Shrink back the expanded element to its original position and remove placeholder
+      function shrinkCurrent() {
+        if (!currentlyExpanded) return;
+        const section = currentlyExpanded;
+
+        // compute final rect of placeholder (in case of page resize/scroll)
+        const rect = placeholder.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        // compute transform back to placeholder rect (relative to current fixed full-screen state)
+        const scaleX = rect.width / vw;
+        const scaleY = rect.height / vh;
+        const translateX = rect.left;
+        const translateY = rect.top;
+
+        // animate transform back to element's original rect
+        // We want to transition from current transform (covering viewport) to the small rect.
+        section.style.transition = `transform ${animDuration}ms cubic-bezier(.22,.9,.35,1)`;
+        // transform that takes full-screen element back to placeholder rect (we invert the earlier math):
+        // current state ~ identity (when covering), to move to rect: translate(translateX, translateY) scale(scaleX, scaleY)
+        // But earlier we used translate(-left, -top) scale(vw/rect.w, vh/rect.h). To reverse, we can compute:
+        // new transform = translate(translateX, translateY) scale(scaleX, scaleY)
+        // where translateX = rect.left, translateY = rect.top, scaleX = rect.width/vw, scaleY = rect.height/vh
+        // Apply:
+        requestAnimationFrame(() => {
+          section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+        });
+
+        // after transition end, restore styles and remove placeholder
+        const onEnd = () => {
+          section.removeEventListener('transitionend', onEnd);
+          // clean up
+          restoreElement(section);
+          removeCloseButton();
+          if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+          placeholder = null;
+          currentlyExpanded = null;
+        };
+
+        if (prefersReduced) {
+          // no transition end event if no animation; just restore immediately
+          onEnd();
+        } else {
+          section.addEventListener('transitionend', onEnd);
+        }
       }
 
-    }, options);
+      // Add close button (only one globally)
+      let closeBtn = null;
+      function addCloseButton() {
+        if (closeBtn) return;
+        closeBtn = document.createElement('button');
+        closeBtn.className = 'exp-close';
+        closeBtn.innerHTML = '✕';
+        closeBtn.title = 'Close';
+        document.body.appendChild(closeBtn);
+        closeBtn.addEventListener('click', shrinkCurrent);
+      }
+      function removeCloseButton() {
+        if (!closeBtn) return;
+        closeBtn.removeEventListener('click', shrinkCurrent);
+        if (closeBtn.parentNode) closeBtn.parentNode.removeChild(closeBtn);
+        closeBtn = null;
+      }
 
-    boxes.forEach(b => observer.observe(b));
-
-    // Accessibility: keyboard focus reveal (optional)
-    boxes.forEach(b => {
-      b.setAttribute('tabindex', '0'); // allow focus
-      b.addEventListener('focus', () => b.classList.add('visible'));
-      b.addEventListener('blur', () => {
-        // remove class on blur only if you want repeated toggles:
-        // b.classList.remove('visible');
+      // If user presses Escape, close
+      window.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape' && currentlyExpanded) shrinkCurrent();
       });
-    });
 
+      // If user clicks outside the expanded element (on body), shrink
+      document.addEventListener('click', (ev) => {
+        if (!currentlyExpanded) return;
+        // if click target is inside the expanded section, ignore
+        if (currentlyExpanded.contains(ev.target)) return;
+        // if click was on the close button, ignore (close button handler will run)
+        if (closeBtn && closeBtn.contains(ev.target)) return;
+        // otherwise shrink
+        shrinkCurrent();
+      }, true);
+
+      // IntersectionObserver: expand when ~50% visible
+      const obsOptions = { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.5 };
+      const observer = new IntersectionObserver((entries) => {
+        // pick the entry with largest intersectionRatio if multiple
+        let best = null;
+        entries.forEach(entry => {
+          if (!best || entry.intersectionRatio > best.intersectionRatio) best = entry;
+          // add visible class for subtle in-place effect
+          if (entry.isIntersecting && entry.intersectionRatio >= obsOptions.threshold) {
+            entry.target.classList.add('visible');
+          } else {
+            entry.target.classList.remove('visible');
+          }
+        });
+
+        if (best && best.isIntersecting && best.intersectionRatio >= obsOptions.threshold) {
+          // Only trigger expand if not already expanded
+          if (!currentlyExpanded) {
+            expandContent(best.target);
+            // If you want expand only on user action instead (e.g. click), stop here and wire click handlers
+            // observer.unobserve(best.target); // optional: don't auto-trigger again
+          }
+        }
+      }, obsOptions);
+
+      contents.forEach(c => observer.observe(c));
+
+      // Keep behaviour stable on resize: if currently expanded, recompute transform so it stays full-screen
+      window.addEventListener('resize', () => {
+        if (!currentlyExpanded) return;
+        // Immediately set transform to fill new viewport
+        const section = currentlyExpanded;
+        const rect = placeholder ? placeholder.getBoundingClientRect() : section.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const scaleX = vw / rect.width;
+        const scaleY = vh / rect.height;
+        const translateX = -rect.left;
+        const translateY = -rect.top;
+        // no transition here to avoid weird animation; just apply
+        section.style.transition = 'transform 0ms';
+        section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+      });
+
+      // Scroll handling: if expanded and user scrolls, keep the fixed element pinned (no jump)
+      // because it's fixed positioned it will remain in viewport, placeholder keeps page height stable.
+      // Optionally collapse on significant scroll—left as-is.
+
+    })();
   </script>
 </body>
 </html>
