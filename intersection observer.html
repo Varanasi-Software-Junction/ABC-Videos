@@ -1,168 +1,175 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Intersection Observer Demo</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Intersection Observer Demo</title>
+  <style>
+    :root{
+      --box-bg: #ccc;
+      --box-bg-visible: #4caf50;
+      --box-color-visible: #fff;
+      --box-width: 60%;
+      --box-padding: 18px;
+      --border-size: 8px;
+      --anim-duration: 600ms;
+    }
 
-        .spacer {
-            height: 100vh;
-            background: #f0f0f0;
-        }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin: 0;
+      background: #f9f9f9;
+      color: #222;
+      line-height: 1.4;
+    }
 
-        .box {
-            margin: 50px auto;
-            width: 50%;
+    .spacer { height: 100vh; display:flex; align-items:center; justify-content:center; color:#666; }
+    .content { min-height: 80vh; padding: 40px 10px; display:flex; align-items:center; justify-content:center; }
 
+    /* Boxes */
+    .box {
+      width: var(--box-width);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--box-padding);
+      background: var(--box-bg);
+      opacity: 0.8;
+      color: #111;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size: 1.2rem;
+      /* Use transform/opacity for animation (GPU accelerated) */
+      transform: translateY(30px) scale(.98);
+      opacity: 0;
+      transition: none; /* we'll drive via animation */
+      will-change: transform, opacity;
+      /* border reserved for visible state */
+    }
 
-            opacity: 0.7;
-            /* height: 150px; */
-            background: #ccc;
-            /* transition: background 0.5s ease; */
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    /* visible state — uses transform + opacity, not width/height changes */
+    .box.visible {
+      animation: boxIn var(--anim-duration) cubic-bezier(.22,.9,.35,1) forwards;
+      background: var(--box-bg-visible);
+      color: var(--box-color-visible);
+      border: solid var(--border-size) rgba(0,0,0,0.08);
+    }
 
-        @keyframes boxanim {
-            0% {
-                opacity: 0;
-                width: 50%;
-                ;
-            }
+    @keyframes boxIn {
+      0% {
+        transform: translateY(30px) scale(.98);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
 
-            100% {
-                opacity: 1;
-                width: 80%;
-                height:700px
-            }
-        }
+    /* Stagger utility when needed (optional) */
+    .box[data-delay="1"] { animation-delay: 80ms; }
+    .box[data-delay="2"] { animation-delay: 160ms; }
+    .box[data-delay="3"] { animation-delay: 240ms; }
 
-        .visible {
-            animation-name: boxanim;
-            animation-timing-function: ease-out;
-            animation-iteration-count: 1;
-            animation-fill-mode: forwards;
-            animation-duration: 300ms;
-            background: #4caf50;
-            color: white;
-            border-style: ridge;
-            border-width: 10px;
+    /* Reduce motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      .box, .box.visible {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+      }
+    }
 
-        }
-    </style>
+    /* Small screens */
+    @media (max-width:700px){
+      :root { --box-width: 92%; --box-padding: 14px; --anim-duration: 450ms; --border-size:6px;}
+      .box { font-size: 1rem; }
+    }
+
+    footer.note { text-align:center; padding:20px; color:#666; font-size:0.9rem; }
+  </style>
 </head>
-
 <body>
-    <div class="spacer">Scroll down to see boxes...</div>
-    <div id="b1" class="box">
+  <div class="spacer">Scroll down to see boxes...</div>
 
-        Box 1
-    </div>
-    <div>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  <section class="content">
+    <div id="b1" class="box" data-delay="1">Box 1 — Hello</div>
+  </section>
 
-        A
+  <section class="content">
+    <div id="b2" class="box" data-delay="2">Box 2 — More content</div>
+  </section>
 
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  <section class="content">
+    <div id="b3" class="box" data-delay="3">Box 3 — Even more</div>
+  </section>
 
+  <section class="content">
+    <div id="b4" class="box">Box 4 — Final</div>
+  </section>
 
-    </div>
-    <div id="b2" class="box">Box 2</div>
-    <div>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  <div class="spacer"></div>
 
-        B
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  <footer class="note">Demo improved: transform-based animation, prefers-reduced-motion support, no layout thrash.</footer>
 
-    </div>
+  <script>
+    // Options:
+    // threshold: 0.5 -> fire when ~50% visible
+    // rootMargin: '0px 0px -10% 0px' -> treat element as visible a little earlier as it enters viewport.
+    const options = {
+      root: null,
+      rootMargin: '0px 0px -10% 0px',
+      threshold: 0.5
+    };
 
+    const boxes = document.querySelectorAll('.box');
 
-    <div id="b3" class="box">Box 3</div>
-    <div>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    const observer = new IntersectionObserver((entries, obs) => {
+      // We'll pick the entry with highest intersectionRatio to set the title
+      let bestEntry = null;
+      for (const entry of entries) {
+        const el = entry.target;
+        if (entry.isIntersecting && entry.intersectionRatio >= options.threshold) {
+          // Add visible class to play animation
+          el.classList.add('visible');
+          console.log('Visible:', el.id, 'ratio:', entry.intersectionRatio.toFixed(2));
+          // If you want each box to animate only once, uncomment:
+          // obs.unobserve(el);
+        } else {
+          // If you want repeated enter/exit animations, remove the class on exit:
+          el.classList.remove('visible');
+        }
 
-        C
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        // pick the highest intersectionRatio entry for title update
+        if (!bestEntry || (entry.intersectionRatio > bestEntry.intersectionRatio)) {
+          bestEntry = entry;
+        }
+      }
 
-    </div>
+      if (bestEntry && bestEntry.isIntersecting) {
+        document.title = bestEntry.target.id + ' is visible';
+      } else {
+        document.title = 'Not visible';
+      }
 
+    }, options);
 
+    boxes.forEach(b => observer.observe(b));
 
-    <div id="b4" class="box">Box 4
-    </div>
-    <div>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    // Accessibility: keyboard focus reveal (optional)
+    boxes.forEach(b => {
+      b.setAttribute('tabindex', '0'); // allow focus
+      b.addEventListener('focus', () => b.classList.add('visible'));
+      b.addEventListener('blur', () => {
+        // remove class on blur only if you want repeated toggles:
+        // b.classList.remove('visible');
+      });
+    });
 
-        D
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-
-    </div>
-
-
-
-
-
-    <div class="spacer"></div>
-
-
-    <script>
-
-        const boxes = document.querySelectorAll('.box');
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    document.title = entry.target.id + " is visible";
-
-
-                    entry.target.classList.add('visible');
-                    console.log('Visible:', entry.target.id);
-                } else {
-
-                    entry.target.classList.remove('visible');
-                    document.title = "Not visible";
-                }
-            });
-            console.log("Current visible box id:");
-        }, {
-            threshold: 0.5
-        });
-
-        boxes.forEach(box => observer.observe(box));
-    </script>
+  </script>
 </body>
-
 </html>
