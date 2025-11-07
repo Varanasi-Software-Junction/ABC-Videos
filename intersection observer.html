@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Content Expand-to-Fullscreen — Auto-switch on Visibility</title>
+  <title>Content Expand-to-Fullscreen — Auto-switch with SVG placeholders</title>
   <style>
     :root{
       --bg:#fafafa;
@@ -40,7 +40,19 @@
       overflow: hidden;
     }
 
-    .content .inner { max-width: 900px; width:100%; }
+    .inner { max-width: 900px; width:100%; display:flex; flex-direction:column; gap:18px; align-items:center; }
+
+    /* SVG placeholder size control */
+    .placeholder-svg {
+      width: 100%;
+      max-height: 48vh; /* keep SVG visible but not overflow */
+      height: auto;
+      display: block;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .caption { font-size: 1rem; color: #222; }
 
     .content.visible { box-shadow: 0 12px 36px rgba(0,0,0,0.10); }
 
@@ -69,20 +81,113 @@
       .content { transition: none !important; }
     }
 
+    @media (max-width:700px){
+      .placeholder-svg { max-height: 40vh; }
+      .content { min-height: 50vh; padding: 20px; margin: 28px 10px; }
+    }
+
     footer.note { text-align:center; color:#666; padding:18px; font-size:.95rem;}
   </style>
 </head>
 <body>
-  <div class="spacer">Scroll down — sections expand to fullscreen when visible. If another becomes visible, it will replace the current.</div>
+  <div class="spacer">Scroll down — sections expand to fullscreen when visible. Each section includes an SVG placeholder image.</div>
 
-  <section class="content" id="c1"><div class="inner"><h2>Section A</h2><p>Content A — expands to fullscreen.</p></div></section>
-  <section class="content" id="c2"><div class="inner"><h2>Section B</h2><p>Content B — will replace A when visible.</p></div></section>
-  <section class="content" id="c3"><div class="inner"><h2>Section C</h2><p>Content C — will replace whoever is open.</p></div></section>
-  <section class="content" id="c4"><div class="inner"><h2>Section D</h2><p>Content D — last section.</p></div></section>
+  <section class="content" id="c1">
+    <div class="inner">
+      <!-- SVG placeholder A -->
+      <svg class="placeholder-svg" role="img" aria-label="Placeholder image for Section A — abstract mountains" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="gA" x1="0" x2="1">
+            <stop offset="0%" stop-color="#e0f7f1"/>
+            <stop offset="100%" stop-color="#a8e6dc"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#gA)"/>
+        <g transform="translate(80,380)" fill="#7fc5b6">
+          <path d="M0 220 L160 40 L310 220 Z"/>
+          <path d="M220 220 L390 80 L560 220 Z" fill="#6fb5a6"/>
+          <path d="M480 220 L720 20 L950 220 Z" fill="#5ea596"/>
+        </g>
+        <circle cx="980" cy="120" r="48" fill="#ffd27a" opacity="0.95"/>
+        <text x="50" y="90" font-family="system-ui, Arial" font-size="44" fill="#0b5a4a">Section A</text>
+      </svg>
+      <div class="caption"><strong>Section A</strong> — SVG placeholder (mountains style).</div>
+    </div>
+  </section>
+
+  <section class="content" id="c2">
+    <div class="inner">
+      <!-- SVG placeholder B -->
+      <svg class="placeholder-svg" role="img" aria-label="Placeholder image for Section B — geometric shapes" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="gB" x1="0" x2="1">
+            <stop offset="0%" stop-color="#fff3e0"/>
+            <stop offset="100%" stop-color="#ffd9b3"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#gB)"/>
+        <g fill-opacity="0.95">
+          <rect x="120" y="120" width="340" height="260" rx="18" fill="#f4a261"/>
+          <circle cx="760" cy="230" r="120" fill="#e76f51"/>
+          <rect x="520" y="380" width="480" height="220" rx="24" fill="#2a9d8f"/>
+        </g>
+        <text x="60" y="92" font-family="system-ui, Arial" font-size="44" fill="#5a3a28">Section B</text>
+      </svg>
+      <div class="caption"><strong>Section B</strong> — SVG placeholder (geometric blocks).</div>
+    </div>
+  </section>
+
+  <section class="content" id="c3">
+    <div class="inner">
+      <!-- SVG placeholder C -->
+      <svg class="placeholder-svg" role="img" aria-label="Placeholder image for Section C — device mockup" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="gC" x1="0" x2="1">
+            <stop offset="0%" stop-color="#f0f6ff"/>
+            <stop offset="100%" stop-color="#d6e8ff"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#gC)"/>
+        <!-- device -->
+        <rect x="200" y="110" rx="28" ry="28" width="420" height="620" fill="#ffffff" stroke="#cfe3ff" stroke-width="6"/>
+        <rect x="600" y="150" rx="24" ry="24" width="360" height="540" fill="#0b78ff" opacity="0.09"/>
+        <!-- little content -->
+        <g transform="translate(240,160)" fill="#7a92d6">
+          <rect width="360" height="36" rx="8"/>
+          <rect y="70" width="320" height="18" rx="6"/>
+          <rect y="110" width="320" height="18" rx="6"/>
+          <rect y="150" width="320" height="18" rx="6"/>
+        </g>
+        <text x="60" y="94" font-family="system-ui, Arial" font-size="44" fill="#274060">Section C</text>
+      </svg>
+      <div class="caption"><strong>Section C</strong> — SVG placeholder (device / mockup).</div>
+    </div>
+  </section>
+
+  <section class="content" id="c4">
+    <div class="inner">
+      <!-- SVG placeholder D -->
+      <svg class="placeholder-svg" role="img" aria-label="Placeholder image for Section D — abstract waves" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="gD" x1="0" x2="1">
+            <stop offset="0%" stop-color="#f7fff3"/>
+            <stop offset="100%" stop-color="#dff8e6"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#gD)"/>
+        <g transform="translate(0,250)" fill="#9be7c4" opacity="0.95">
+          <path d="M0 180 C150 80, 300 80, 450 180 C600 280, 750 280, 900 180 C1050 80, 1200 80, 1200 80 L1200 260 L0 260 Z"/>
+        </g>
+        <circle cx="200" cy="140" r="36" fill="#ffd27a" />
+        <text x="60" y="94" font-family="system-ui, Arial" font-size="44" fill="#13613b">Section D</text>
+      </svg>
+      <div class="caption"><strong>Section D</strong> — SVG placeholder (waves / abstract).</div>
+    </div>
+  </section>
 
   <div class="spacer"></div>
 
-  <footer class="note">Auto-switch demo: expands the actual .content element (fixed positioning + transform).</footer>
+  <footer class="note">Auto-switch demo with inline SVG placeholders (responsive and accessible).</footer>
 
   <script>
     (function(){
@@ -93,9 +198,8 @@
       let currentlyExpanded = null;
       let placeholder = null;
       let closeBtn = null;
-      let isAnimating = false; // prevents overlapping expand/shrink
+      let isAnimating = false;
 
-      // Helper to fix element at rect
       function fixElementAtRect(el, rect) {
         el.style.position = 'fixed';
         el.style.left = rect.left + 'px';
@@ -120,7 +224,6 @@
         el.classList.remove('expanding');
       }
 
-      // Create close button once
       function ensureCloseButton() {
         if (closeBtn) return;
         closeBtn = document.createElement('button');
@@ -140,7 +243,6 @@
         closeBtn = null;
       }
 
-      // Expand a section (returns a Promise that resolves when expansion finishes)
       function expandContent(section) {
         return new Promise((resolve) => {
           if (isAnimating) { resolve(); return; }
@@ -151,7 +253,6 @@
           const vw = window.innerWidth;
           const vh = window.innerHeight;
 
-          // placeholder to preserve flow
           placeholder = document.createElement('div');
           placeholder.style.width = rect.width + 'px';
           placeholder.style.height = rect.height + 'px';
@@ -166,11 +267,10 @@
           const translateY = -rect.top;
 
           section.style.transition = `transform ${animDuration}ms cubic-bezier(.22,.9,.35,1)`;
-          section.getBoundingClientRect(); // force layout
+          section.getBoundingClientRect();
 
           if (prefersReduced) {
             section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-            // immediate resolve
             isAnimating = false;
             currentlyExpanded = section;
             resolve();
@@ -184,7 +284,6 @@
             resolve();
           }
 
-          // fallback in case transitionend doesn't fire
           let called = false;
           const fallback = setTimeout(() => {
             if (!called) { called = true; onEnd(); }
@@ -197,20 +296,17 @@
             onEnd();
           }, { once: true });
 
-          // animate
           requestAnimationFrame(() => {
             section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-            // focus close button for accessibility
             if (closeBtn) closeBtn.focus();
           });
         });
       }
 
-      // Shrink current (returns Promise)
       function shrinkCurrent() {
         return new Promise((resolve) => {
           if (!currentlyExpanded) { resolve(); return; }
-          if (isAnimating) { resolve(); return; } // avoid double-shrink
+          if (isAnimating) { resolve(); return; }
           isAnimating = true;
           const section = currentlyExpanded;
           const rect = placeholder.getBoundingClientRect();
@@ -225,7 +321,6 @@
           section.style.transition = `transform ${animDuration}ms cubic-bezier(.22,.9,.35,1)`;
 
           if (prefersReduced) {
-            // instant restore
             restoreElement(section);
             if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
             placeholder = null;
@@ -247,7 +342,6 @@
             resolve();
           }
 
-          // fallback in case transitionend doesn't fire
           let called = false;
           const fallback = setTimeout(() => {
             if (!called) { called = true; onEnd(); }
@@ -260,22 +354,17 @@
             onEnd();
           }, { once: true });
 
-          // animate back
           requestAnimationFrame(() => {
             section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
           });
         });
       }
 
-      // IntersectionObserver: when a section becomes visible, expand it.
-      // If another section is expanded, shrink it first, then expand the new one.
       const obsOptions = { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.5 };
       const observer = new IntersectionObserver(async (entries) => {
-        // find best candidate (highest ratio) that is intersecting
         let best = null;
         entries.forEach(e => {
           if (!best || e.intersectionRatio > best.intersectionRatio) best = e;
-          // toggle subtle visible class
           if (e.isIntersecting && e.intersectionRatio >= obsOptions.threshold) e.target.classList.add('visible');
           else e.target.classList.remove('visible');
         });
@@ -283,17 +372,13 @@
         if (!best) return;
         if (best.isIntersecting && best.intersectionRatio >= obsOptions.threshold) {
           const target = best.target;
-          // if already expanded to same target, nothing to do
           if (currentlyExpanded === target) return;
 
-          // if another is expanded, shrink it first
           if (currentlyExpanded && currentlyExpanded !== target) {
             await shrinkCurrent();
-            // small micro-delay to ensure layout stabilized before expanding next (helps on some browsers)
             await new Promise(res => requestAnimationFrame(res));
           }
 
-          // expand the target (only if no one else expanded it in the meantime)
           if (!currentlyExpanded) {
             await expandContent(target);
           }
@@ -302,26 +387,19 @@
 
       sections.forEach(s => observer.observe(s));
 
-      // Close on ESC
       window.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Escape' && currentlyExpanded && !isAnimating) {
-          shrinkCurrent();
-        }
+        if (ev.key === 'Escape' && currentlyExpanded && !isAnimating) shrinkCurrent();
       });
 
-      // Clicking outside expanded section closes it
       document.addEventListener('click', (ev) => {
         if (!currentlyExpanded || isAnimating) return;
         if (currentlyExpanded.contains(ev.target)) return;
         if (closeBtn && closeBtn.contains(ev.target)) return;
-        // shrink
         shrinkCurrent();
       }, true);
 
-      // Handle resize while expanded: keep it covering viewport
       window.addEventListener('resize', () => {
         if (!currentlyExpanded) return;
-        // recompute transform to remain covering viewport
         const section = currentlyExpanded;
         const rect = placeholder ? placeholder.getBoundingClientRect() : section.getBoundingClientRect();
         const vw = window.innerWidth;
@@ -330,7 +408,6 @@
         const scaleY = vh / rect.height;
         const translateX = -rect.left;
         const translateY = -rect.top;
-        // apply immediately without transition to avoid flicker
         section.style.transition = 'transform 0ms';
         section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
       });
