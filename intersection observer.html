@@ -1,243 +1,149 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fullscreen Sections — No Animations</title>
-  <style>
-    :root {
-      --bg: #fafafa;
-      --box-bg: #e8e8e8;
-      --close-size: 44px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      height: 100%;
-      font-family: system-ui, Arial, sans-serif;
-      background: var(--bg);
-      color: #111;
-    }
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cinematic Crossfade + Subtle Zoom</title>
+<style>
+:root{
+  --bg:#fafafa;
+  --box-bg:#e8e8e8;
+  --fade-duration:900ms;
+  --zoom-scale:1.05;
+  --close-size:44px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:#111}
+.spacer{height:100vh;display:flex;align-items:center;justify-content:center;color:#666;font-size:1.2rem}
 
-    .spacer {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #666;
-      font-size: 1.2rem;
-    }
-
-    .content {
-      min-height: 60vh;
-      margin: 48px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--box-bg);
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-      padding: 28px;
-      text-align: center;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .inner {
-      max-width: 900px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 18px;
-    }
-
-    .media {
-      width: 100%;
-      max-height: 48vh;
-      height: auto;
-      border-radius: 8px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-      background: #f6f6f6;
-      display: block;
-      object-fit: cover;
-    }
-
-    .caption { font-size: 1rem; color: #333; }
-
-    .exp-close {
-      position: fixed;
-      right: 18px;
-      top: 18px;
-      width: var(--close-size);
-      height: var(--close-size);
-      border-radius: 8px;
-      border: 0;
-      background: rgba(255,255,255,0.95);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      cursor: pointer;
-      z-index: 12001;
-    }
-
-    footer.note {
-      text-align: center;
-      color: #666;
-      padding: 18px;
-      font-size: .95rem;
-    }
-
-    @media (max-width: 700px) {
-      .media { max-height: 40vh; }
-      .content { min-height: 50vh; padding: 20px; margin: 28px 10px; }
-    }
-  </style>
+.content{
+  min-height:60vh;margin:48px 12px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--box-bg);border-radius:12px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.06);
+  padding:28px;text-align:center;overflow:hidden;position:relative;
+  opacity:0;transform:scale(1);
+  transition:opacity var(--fade-duration) ease,transform var(--fade-duration) ease;
+}
+.content.active{
+  opacity:1;
+  transform:scale(var(--zoom-scale));
+  z-index:10;
+}
+.inner{max-width:900px;width:100%;display:flex;flex-direction:column;align-items:center;gap:18px}
+.media{
+  width:100%;max-height:48vh;height:auto;border-radius:8px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);background:#f6f6f6;
+  display:block;object-fit:cover;
+  transition:opacity var(--fade-duration) ease;
+}
+.caption{font-size:1rem;color:#333;margin-top:8px}
+.exp-close{
+  position:fixed;right:18px;top:18px;width:var(--close-size);height:var(--close-size);
+  border-radius:8px;border:0;background:rgba(255,255,255,0.95);
+  box-shadow:0 8px 24px rgba(0,0,0,0.18);
+  display:flex;align-items:center;justify-content:center;font-weight:600;cursor:pointer;z-index:12001;
+}
+footer.note{text-align:center;color:#666;padding:18px;font-size:.95rem}
+@media (max-width:700px){
+  .media{max-height:40vh}
+  .content{min-height:50vh;padding:20px;margin:28px 10px}
+}
+</style>
 </head>
 <body>
-  <div class="spacer">Scroll — each section instantly expands to fullscreen. No animations.</div>
+<div class="spacer">Scroll — cinematic crossfade + zoom effect between sections ✨</div>
 
-  <!-- SECTION A -->
-  <section class="content" id="c1">
-    <div class="inner">
-      <svg class="media" viewBox="0 0 1200 700" role="img" aria-label="Section A illustration">
-        <defs>
-          <linearGradient id="gA" x1="0" x2="1">
-            <stop offset="0%" stop-color="#e0f7f1"/>
-            <stop offset="100%" stop-color="#a8e6dc"/>
-          </linearGradient>
-        </defs>
-        <rect width="1200" height="700" fill="url(#gA)"/>
-        <text x="50" y="90" font-size="44" fill="#0b5a4a">Section A</text>
-      </svg>
-      <div class="caption"><strong>Section A</strong></div>
-    </div>
-  </section>
+<!-- SECTION A -->
+<section class="content" id="c1">
+  <div class="inner">
+    <svg class="media" viewBox="0 0 1200 700" role="img" aria-label="Section A illustration">
+      <defs><linearGradient id="gA" x1="0" x2="1"><stop offset="0%" stop-color="#e0f7f1"/><stop offset="100%" stop-color="#a8e6dc"/></linearGradient></defs>
+      <rect width="1200" height="700" fill="url(#gA)"/>
+      <text x="50" y="90" font-size="44" fill="#0b5a4a">Section A</text>
+    </svg>
+    <div class="caption"><strong>Section A</strong></div>
+  </div>
+</section>
 
-  <!-- SECTION B -->
-  <section class="content" id="c2">
-    <div class="inner">
-      <svg class="media" viewBox="0 0 1200 700" role="img" aria-label="Section B illustration">
-        <rect width="1200" height="700" fill="#ffd9b3"/>
-        <text x="60" y="92" font-size="44" fill="#5a3a28">Section B</text>
-      </svg>
-      <div class="caption"><strong>Section B</strong></div>
-    </div>
-  </section>
+<!-- SECTION B -->
+<section class="content" id="c2">
+  <div class="inner">
+    <svg class="media" viewBox="0 0 1200 700" role="img" aria-label="Section B illustration">
+      <rect width="1200" height="700" fill="#ffd9b3"/>
+      <text x="60" y="92" font-size="44" fill="#5a3a28">Section B</text>
+    </svg>
+    <div class="caption"><strong>Section B</strong></div>
+  </div>
+</section>
 
-  <!-- SECTION C -->
-  <section class="content" id="c3">
-    <div class="inner">
-      <video class="media" src="videos/0.webm" muted autoplay loop playsinline controls></video>
-      <div class="caption"><strong>Section C</strong> — videos/0.webm</div>
-    </div>
-  </section>
+<!-- SECTION C -->
+<section class="content" id="c3">
+  <div class="inner">
+    <video class="media" src="videos/0.webm" muted autoplay loop playsinline controls></video>
+    <div class="caption"><strong>Section C</strong> — videos/0.webm</div>
+  </div>
+</section>
 
-  <!-- SECTION D -->
-  <section class="content" id="c4">
-    <div class="inner">
-      <video class="media" src="videos/0.mp4" muted autoplay loop playsinline controls></video>
-      <div class="caption"><strong>Section D</strong> — videos/0.mp4</div>
-    </div>
-  </section>
+<!-- SECTION D -->
+<section class="content" id="c4">
+  <div class="inner">
+    <video class="media" src="videos/0.mp4" muted autoplay loop playsinline controls></video>
+    <div class="caption"><strong>Section D</strong> — videos/0.mp4</div>
+  </div>
+</section>
 
-  <div class="spacer"></div>
-  <footer class="note">All animations removed. Sections expand instantly and remain stable.</footer>
+<div class="spacer"></div>
+<footer class="note">Soft crossfade + zoom gives a cinematic look. No flicker, fully responsive.</footer>
 
-  <script>
-  (function(){
-    const sections = Array.from(document.querySelectorAll('.content'));
-    let current = null;
-    let placeholder = null;
-    let closeBtn = null;
-    let busy = false;
-
-    // Create close button
-    function makeClose() {
-      if (closeBtn) return;
-      closeBtn = document.createElement('button');
-      closeBtn.className = 'exp-close';
-      closeBtn.textContent = '✕';
-      closeBtn.title = 'Close';
-      closeBtn.onclick = () => shrink();
-      document.body.appendChild(closeBtn);
-    }
-
-    function removeClose() {
-      if (!closeBtn) return;
-      closeBtn.remove();
-      closeBtn = null;
-    }
-
-    // Expand instantly to fullscreen
-    function expand(el) {
-      if (busy) return;
-      busy = true;
-      makeClose();
-
-      const rect = el.getBoundingClientRect();
-      placeholder = document.createElement('div');
-      placeholder.style.width = rect.width + 'px';
-      placeholder.style.height = rect.height + 'px';
-      placeholder.style.margin = getComputedStyle(el).margin;
-      el.parentNode.insertBefore(placeholder, el);
-
-      el.style.position = 'fixed';
-      el.style.left = 0;
-      el.style.top = 0;
-      el.style.width = '100vw';
-      el.style.height = '100vh';
-      el.style.margin = 0;
-      el.style.zIndex = 12000;
-      el.style.transform = 'none';
-      el.style.transition = 'none';
-
-      current = el;
-      busy = false;
-    }
-
-    // Shrink instantly
-    function shrink() {
-      if (!current || busy) return;
-      busy = true;
-      const el = current;
-      el.style.position = '';
-      el.style.left = '';
-      el.style.top = '';
-      el.style.width = '';
-      el.style.height = '';
-      el.style.margin = '';
-      el.style.zIndex = '';
-      if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
-      placeholder = null;
-      removeClose();
-      current = null;
-      busy = false;
-    }
-
-    // Observer for auto-switch behavior
-    const observer = new IntersectionObserver(entries => {
-      let best = entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
-      if (!best) return;
-      const el = best.target;
-      if (current === el) return;
-      if (current && current !== el) shrink();
-      expand(el);
-    }, {threshold:0.5});
-
-    sections.forEach(s=>observer.observe(s));
-
-    // Controls
-    window.addEventListener('keydown', e => { if (e.key === 'Escape') shrink(); });
-    document.addEventListener('click', e => {
-      if (!current) return;
-      if (current.contains(e.target)) return;
-      if (closeBtn && closeBtn.contains(e.target)) return;
-      shrink();
-    }, true);
-
-  })();
-  </script>
+<script>
+(()=>{
+  const sections=[...document.querySelectorAll('.content')];
+  let current=null,closeBtn=null;
+  function makeClose(){
+    if(closeBtn)return;
+    closeBtn=document.createElement('button');
+    closeBtn.className='exp-close';
+    closeBtn.textContent='✕';
+    closeBtn.title='Close';
+    closeBtn.onclick=()=>deactivate(current);
+    document.body.appendChild(closeBtn);
+  }
+  function removeClose(){
+    if(!closeBtn)return;
+    closeBtn.remove();closeBtn=null;
+  }
+  function activate(sec){
+    if(current===sec)return;
+    if(current)deactivate(current);
+    sec.classList.add('active');
+    makeClose();
+    current=sec;
+  }
+  function deactivate(sec){
+    if(!sec)return;
+    sec.classList.remove('active');
+    current=null;
+    removeClose();
+  }
+  // intersection observer
+  const obs=new IntersectionObserver(entries=>{
+    const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+    if(!visible)return;
+    activate(visible.target);
+  },{threshold:0.5});
+  sections.forEach(s=>obs.observe(s));
+  // initial
+  if(sections[0])sections[0].classList.add('active');
+  // close on esc / click outside
+  window.addEventListener('keydown',e=>{if(e.key==='Escape')deactivate(current);});
+  document.addEventListener('click',e=>{
+    if(!current)return;
+    if(current.contains(e.target))return;
+    if(closeBtn&&closeBtn.contains(e.target))return;
+    deactivate(current);
+  },true);
+})();
+</script>
 </body>
 </html>
