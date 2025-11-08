@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Content Expand-to-Fullscreen — Centered Expansion</title>
+  <title>Centered Expansion — Video in last section</title>
   <style>
     :root{
       --bg:#fafafa;
@@ -42,13 +42,20 @@
 
     .inner { max-width: 900px; width:100%; display:flex; flex-direction:column; gap:18px; align-items:center; }
 
-    .placeholder-svg {
+    .placeholder-svg,
+    .placeholder-video {
       width: 100%;
-      max-height: 48vh;
+      max-height: 48vh; /* keep media visible but not overflow */
       height: auto;
       display: block;
       border-radius: 8px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      background: #f6f6f6;
+    }
+
+    /* For video we want it to cover the box nicely while preserving aspect ratio */
+    .placeholder-video {
+      object-fit: cover;
     }
 
     .caption { font-size: 1rem; color: #222; }
@@ -81,7 +88,7 @@
     }
 
     @media (max-width:700px){
-      .placeholder-svg { max-height: 40vh; }
+      .placeholder-svg, .placeholder-video { max-height: 40vh; }
       .content { min-height: 50vh; padding: 20px; margin: 28px 10px; }
     }
 
@@ -89,7 +96,7 @@
   </style>
 </head>
 <body>
-  <div class="spacer">Scroll down — sections expand to fullscreen and will be centered in the viewport.</div>
+  <div class="spacer">Scroll down — sections expand to fullscreen and will be centered. The last section contains a video (videos/0.mp4).</div>
 
   <section class="content" id="c1">
     <div class="inner">
@@ -165,28 +172,25 @@
 
   <section class="content" id="c4">
     <div class="inner">
-      <!-- SVG placeholder D -->
-      <svg class="placeholder-svg" role="img" aria-label="Placeholder image for Section D — abstract waves" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <linearGradient id="gD" x1="0" x2="1">
-            <stop offset="0%" stop-color="#f7fff3"/>
-            <stop offset="100%" stop-color="#dff8e6"/>
-          </linearGradient>
-        </defs>
-        <rect width="1200" height="700" fill="url(#gD)"/>
-        <g transform="translate(0,250)" fill="#9be7c4" opacity="0.95">
-          <path d="M0 180 C150 80, 300 80, 450 180 C600 280, 750 280, 900 180 C1050 80, 1200 80, 1200 80 L1200 260 L0 260 Z"/>
-        </g>
-        <circle cx="200" cy="140" r="36" fill="#ffd27a" />
-        <text x="60" y="94" font-family="system-ui, Arial" font-size="44" fill="#13613b">Section D</text>
-      </svg>
-      <div class="caption"><strong>Section D</strong> — SVG placeholder (waves / abstract).</div>
+      <!-- Video placeholder D -->
+      <video
+        class="placeholder-video"
+        src="videos/0.mp4"
+        role="img"
+        aria-label="Video placeholder for Section D"
+        playsinline
+        muted
+        autoplay
+        loop
+        controls
+      ></video>
+      <div class="caption"><strong>Section D</strong> — Video (videos/0.mp4).</div>
     </div>
   </section>
 
   <div class="spacer"></div>
 
-  <footer class="note">Centered expansion: transform-origin set to the element center and translation computed to move the element's center into the viewport center.</footer>
+  <footer class="note">Centered expansion: the last section contains a responsive video element that scales during expand/shrink.</footer>
 
   <script>
     (function(){
@@ -208,7 +212,6 @@
         el.style.margin = '0';
         el.style.zIndex = 12000;
         el.classList.add('expanding');
-        // set transform-origin to center so scaling centers on the element center
         el.style.transformOrigin = '50% 50%';
       }
 
@@ -245,7 +248,6 @@
         closeBtn = null;
       }
 
-      // Expand a section — center the section's center in the viewport while scaling it to fullscreen
       function expandContent(section) {
         return new Promise((resolve) => {
           if (isAnimating) { resolve(); return; }
@@ -263,25 +265,22 @@
           placeholder.style.margin = getComputedStyle(section).margin;
           section.parentNode.insertBefore(placeholder, section);
 
-          // fix element at its rect and set transform origin to center
           fixElementAtRect(section, rect);
 
           // compute scale factors
           const scaleX = vw / rect.width;
           const scaleY = vh / rect.height;
 
-          // compute translation so the section's center moves to viewport center
+          // compute translation to center element's center in viewport
           const elemCenterX = rect.left + rect.width / 2;
           const elemCenterY = rect.top + rect.height / 2;
           const translateX = (vw / 2) - elemCenterX;
           const translateY = (vh / 2) - elemCenterY;
 
-          // set transition & animate
           section.style.transition = `transform ${animDuration}ms cubic-bezier(.22,.9,.35,1)`;
           section.getBoundingClientRect();
 
           if (prefersReduced) {
-            // jump to final transform (no animation)
             section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
             isAnimating = false;
             currentlyExpanded = section;
@@ -309,14 +308,12 @@
           }, { once: true });
 
           requestAnimationFrame(() => {
-            // translate center -> center, and scale to cover viewport
             section.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
             if (closeBtn) closeBtn.focus();
           });
         });
       }
 
-      // Shrink current expanded section back to its placeholder (animate to transform: none)
       function shrinkCurrent() {
         return new Promise((resolve) => {
           if (!currentlyExpanded) { resolve(); return; }
@@ -339,7 +336,6 @@
 
           function onEnd() {
             section.removeEventListener('transitionend', onEnd);
-            // restore to document flow
             restoreElement(section);
             if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
             placeholder = null;
@@ -361,7 +357,6 @@
             onEnd();
           }, { once: true });
 
-          // animate back to identity (no transform) — because we used center-origin, this returns nicely centered -> original
           requestAnimationFrame(() => {
             section.style.transform = `none`;
           });
@@ -408,7 +403,6 @@
 
       window.addEventListener('resize', () => {
         if (!currentlyExpanded) return;
-        // recompute transform so the center remains centered on resize
         const section = currentlyExpanded;
         if (!placeholder) return;
         const rect = placeholder.getBoundingClientRect();
