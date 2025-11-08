@@ -1,64 +1,147 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Cinematic Crossfade + Subtle Zoom</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cinematic Crossfade + Zoom + Interactive Parallax</title>
 <style>
-:root{
-  --bg:#fafafa;
-  --box-bg:#e8e8e8;
-  --fade-duration:900ms;
-  --zoom-scale:1.05;
-  --close-size:44px;
+:root {
+  --bg: #f7f7f7;
+  --box-bg: #ffffff;
+  --fade-duration: 900ms;
+  --zoom-scale: 1.05;
+  --close-size: 44px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:#111}
-.spacer{height:100vh;display:flex;align-items:center;justify-content:center;color:#666;font-size:1.2rem}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%;
+  font-family: system-ui, Arial, sans-serif;
+  background: var(--bg);
+  color: #111;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  perspective: 1000px;
+}
 
-.content{
-  min-height:60vh;margin:48px 12px;
-  display:flex;align-items:center;justify-content:center;
-  background:var(--box-bg);border-radius:12px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.06);
-  padding:28px;text-align:center;overflow:hidden;position:relative;
-  opacity:0;transform:scale(1);
-  transition:opacity var(--fade-duration) ease,transform var(--fade-duration) ease;
+/* Interactive parallax background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 30% 40%, #d8eaff, #fefefe 70%);
+  background-size: 200% 200%;
+  z-index: -1;
+  transition: background-position 0.5s ease-out;
+  animation: bgDrift 25s ease-in-out infinite alternate;
 }
-.content.active{
-  opacity:1;
-  transform:scale(var(--zoom-scale));
-  z-index:10;
+@keyframes bgDrift {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 100%; }
 }
-.inner{max-width:900px;width:100%;display:flex;flex-direction:column;align-items:center;gap:18px}
-.media{
-  width:100%;max-height:48vh;height:auto;border-radius:8px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.08);background:#f6f6f6;
-  display:block;object-fit:cover;
-  transition:opacity var(--fade-duration) ease;
+
+.spacer {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 1.2rem;
 }
-.caption{font-size:1rem;color:#333;margin-top:8px}
-.exp-close{
-  position:fixed;right:18px;top:18px;width:var(--close-size);height:var(--close-size);
-  border-radius:8px;border:0;background:rgba(255,255,255,0.95);
-  box-shadow:0 8px 24px rgba(0,0,0,0.18);
-  display:flex;align-items:center;justify-content:center;font-weight:600;cursor:pointer;z-index:12001;
+
+.content {
+  min-height: 60vh;
+  margin: 48px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--box-bg);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  padding: 28px;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+  opacity: 0;
+  transform: scale(1);
+  transition: opacity var(--fade-duration) ease, transform var(--fade-duration) ease;
+  will-change: transform, opacity;
 }
-footer.note{text-align:center;color:#666;padding:18px;font-size:.95rem}
-@media (max-width:700px){
-  .media{max-height:40vh}
-  .content{min-height:50vh;padding:20px;margin:28px 10px}
+.content.active {
+  opacity: 1;
+  transform: scale(var(--zoom-scale));
+  z-index: 5;
+}
+
+.inner {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.media {
+  width: 100%;
+  max-height: 48vh;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  background: #f6f6f6;
+  display: block;
+  object-fit: cover;
+  transition: opacity var(--fade-duration) ease;
+}
+.caption {
+  font-size: 1rem;
+  color: #333;
+  margin-top: 8px;
+}
+
+.exp-close {
+  position: fixed;
+  right: 18px;
+  top: 18px;
+  width: var(--close-size);
+  height: var(--close-size);
+  border-radius: 8px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 12001;
+}
+
+footer.note {
+  text-align: center;
+  color: #666;
+  padding: 18px;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 700px) {
+  .media { max-height: 40vh; }
+  .content { min-height: 50vh; padding: 20px; margin: 28px 10px; }
 }
 </style>
 </head>
 <body>
-<div class="spacer">Scroll — cinematic crossfade + zoom effect between sections ✨</div>
+<div class="spacer">Scroll — cinematic fade + zoom + interactive parallax background ✨</div>
 
-<!-- SECTION A -->
 <section class="content" id="c1">
   <div class="inner">
     <svg class="media" viewBox="0 0 1200 700" role="img" aria-label="Section A illustration">
-      <defs><linearGradient id="gA" x1="0" x2="1"><stop offset="0%" stop-color="#e0f7f1"/><stop offset="100%" stop-color="#a8e6dc"/></linearGradient></defs>
+      <defs>
+        <linearGradient id="gA" x1="0" x2="1">
+          <stop offset="0%" stop-color="#e0f7f1"/>
+          <stop offset="100%" stop-color="#a8e6dc"/>
+        </linearGradient>
+      </defs>
       <rect width="1200" height="700" fill="url(#gA)"/>
       <text x="50" y="90" font-size="44" fill="#0b5a4a">Section A</text>
     </svg>
@@ -66,7 +149,6 @@ footer.note{text-align:center;color:#666;padding:18px;font-size:.95rem}
   </div>
 </section>
 
-<!-- SECTION B -->
 <section class="content" id="c2">
   <div class="inner">
     <svg class="media" viewBox="0 0 1200 700" role="img" aria-label="Section B illustration">
@@ -77,7 +159,6 @@ footer.note{text-align:center;color:#666;padding:18px;font-size:.95rem}
   </div>
 </section>
 
-<!-- SECTION C -->
 <section class="content" id="c3">
   <div class="inner">
     <video class="media" src="videos/0.webm" muted autoplay loop playsinline controls></video>
@@ -85,7 +166,6 @@ footer.note{text-align:center;color:#666;padding:18px;font-size:.95rem}
   </div>
 </section>
 
-<!-- SECTION D -->
 <section class="content" id="c4">
   <div class="inner">
     <video class="media" src="videos/0.mp4" muted autoplay loop playsinline controls></video>
@@ -94,12 +174,15 @@ footer.note{text-align:center;color:#666;padding:18px;font-size:.95rem}
 </section>
 
 <div class="spacer"></div>
-<footer class="note">Soft crossfade + zoom gives a cinematic look. No flicker, fully responsive.</footer>
+<footer class="note">
+  ✨ Smooth fade + zoom sections with an interactive parallax background that follows your cursor.
+</footer>
 
 <script>
 (()=>{
   const sections=[...document.querySelectorAll('.content')];
   let current=null,closeBtn=null;
+
   function makeClose(){
     if(closeBtn)return;
     closeBtn=document.createElement('button');
@@ -111,7 +194,8 @@ footer.note{text-align:center;color:#666;padding:18px;font-size:.95rem}
   }
   function removeClose(){
     if(!closeBtn)return;
-    closeBtn.remove();closeBtn=null;
+    closeBtn.remove();
+    closeBtn=null;
   }
   function activate(sec){
     if(current===sec)return;
@@ -126,23 +210,42 @@ footer.note{text-align:center;color:#666;padding:18px;font-size:.95rem}
     current=null;
     removeClose();
   }
-  // intersection observer
+
+  // Intersection observer for switching
   const obs=new IntersectionObserver(entries=>{
-    const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+    const visible=entries.filter(e=>e.isIntersecting)
+      .sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
     if(!visible)return;
     activate(visible.target);
   },{threshold:0.5});
   sections.forEach(s=>obs.observe(s));
-  // initial
   if(sections[0])sections[0].classList.add('active');
-  // close on esc / click outside
-  window.addEventListener('keydown',e=>{if(e.key==='Escape')deactivate(current);});
+
+  // Close on ESC or click outside
+  window.addEventListener('keydown',e=>{
+    if(e.key==='Escape')deactivate(current);
+  });
   document.addEventListener('click',e=>{
     if(!current)return;
     if(current.contains(e.target))return;
     if(closeBtn&&closeBtn.contains(e.target))return;
     deactivate(current);
   },true);
+
+  // Interactive parallax: move background based on cursor position
+  const bg=document.body;
+  let mouseX=0,mouseY=0;
+  window.addEventListener('mousemove',e=>{
+    // Normalize to range -0.5 to 0.5
+    const x=(e.clientX/window.innerWidth)-0.5;
+    const y=(e.clientY/window.innerHeight)-0.5;
+    mouseX=x*20; // smaller multiplier = gentler movement
+    mouseY=y*20;
+    // apply using background-position with CSS variable-like effect
+    bg.style.setProperty('--bg-pos-x',`${50+mouseX}%`);
+    bg.style.setProperty('--bg-pos-y',`${50+mouseY}%`);
+    bg.style.backgroundPosition=`${50+mouseX}% ${50+mouseY}%`;
+  });
 })();
 </script>
 </body>
