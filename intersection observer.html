@@ -1,252 +1,379 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Cinematic Crossfade + Zoom + Interactive Parallax</title>
-<style>
-:root {
-  --bg: #f7f7f7;
-  --box-bg: #ffffff;
-  --fade-duration: 900ms;
-  --zoom-scale: 1.05;
-  --close-size: 44px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  height: 100%;
-  font-family: system-ui, Arial, sans-serif;
-  background: var(--bg);
-  color: #111;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-  perspective: 1000px;
-}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pure Cinema — Vertical Video Showcase (Observer demo)</title>
+  <meta name="description" content="Six-video vertical showcase — observer demo" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#fff;
+      --ink:#0f172a;
+      --muted:#6b7280;
+      --accent:#ffb703;      /* saffron */
+      --accent-dark:#d48a00;
+      --card:#fbfbfb;
+      --radius:12px;
+      --maxw:1100px;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#fff,#fcfbf8);color:var(--ink);-webkit-font-smoothing:antialiased;}
+    .wrap{max-width:var(--maxw);margin:0 auto;padding:28px;}
 
-/* Interactive parallax background */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at 30% 40%, #d8eaff, #fefefe 70%);
-  background-size: 200% 200%;
-  z-index: -1;
-  transition: background-position 0.5s ease-out;
-  animation: bgDrift 25s ease-in-out infinite alternate;
-}
-@keyframes bgDrift {
-  0% { background-position: 0% 0%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 100%; }
-}
+    /* Header */
+    header.hero{
+      display:flex;flex-direction:column;gap:14px;align-items:flex-start;padding:28px;border-radius:16px;
+      background:linear-gradient(180deg,rgba(255,183,3,0.06),rgba(255,255,255,0.02));
+      margin-bottom:28px;
+      box-shadow:0 10px 30px rgba(2,6,23,0.04);
+    }
+    .brand{display:flex;gap:14px;align-items:center;}
+    .logo{width:64px;height:64px;border-radius:12px;display:grid;place-items:center;font-weight:800;
+          background:linear-gradient(135deg,var(--accent),var(--accent-dark)); color:#082032; font-family:"Playfair Display",serif;}
+    header h1{margin:0;font-family:"Playfair Display",serif;font-size:clamp(1.6rem,3.5vw,2.6rem);}
+    header p.lead{margin:0;color:var(--muted);max-width:70ch;font-size:1.03rem;}
 
-.spacer {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  font-size: 1.2rem;
-}
+    /* Video cards */
+    .videos { display:flex;flex-direction:column; gap:18px; margin-bottom:36px; }
+    .video-card{
+      background:var(--card); border-radius:var(--radius); padding:14px; display:flex; flex-direction:column; gap:10px;
+      box-shadow:0 8px 22px rgba(2,6,23,0.03); border:1px solid rgba(2,6,23,0.03);
+      transform-origin:center;
+      transition:transform 420ms cubic-bezier(.2,.9,.2,1), box-shadow 420ms ease, filter 420ms ease;
+      will-change:transform, box-shadow;
+      position:relative;
+      isolation:isolate;
+    }
+    /* the 'in view' styling applied by IntersectionObserver */
+    .video-card.in-view{
+      transform: translateY(-12px) rotateX(1deg) scale(1.02);
+      box-shadow:0 26px 48px rgba(2,6,23,0.12);
+      filter:brightness(1.02);
+    }
+    .video-card header{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .video-title{font-weight:700;}
+    .video-desc{color:var(--muted);font-size:0.95rem;margin:0;}
+    .video-el{width:100%;border-radius:10px;overflow:hidden;background:#000;}
+    video{width:100%;height:auto;display:block;background:#000;}
 
-.content {
-  min-height: 60vh;
-  margin: 48px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--box-bg);
-  border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-  padding: 28px;
-  text-align: center;
-  overflow: hidden;
-  position: relative;
-  opacity: 0;
-  transform: scale(1);
-  transition: opacity var(--fade-duration) ease, transform var(--fade-duration) ease;
-  will-change: transform, opacity;
-}
-.content.active {
-  opacity: 1;
-  transform: scale(var(--zoom-scale));
-  z-index: 5;
-}
+    /* small view badge used for testing */
+    .view-badge{
+      position:absolute;right:12px;top:12px;padding:6px 8px;border-radius:8px;font-weight:700;font-size:0.8rem;
+      background:rgba(3,7,18,0.9); color:var(--accent); display:inline-flex;align-items:center;gap:8px;
+      box-shadow:0 6px 18px rgba(2,6,23,0.12);
+      opacity:0; transform:translateY(-6px); transition:opacity 260ms ease, transform 260ms ease;
+      pointer-events:none;
+    }
+    .video-card.in-view .view-badge{ opacity:1; transform:translateY(0); }
 
-.inner {
-  max-width: 900px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-}
+    /* Summary & CTA */
+    .summary{padding:20px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff);box-shadow:0 8px 20px rgba(2,6,23,0.02);display:flex;gap:18px;align-items:center;justify-content:space-between;}
+    .summary .text{max-width:70%;}
+    .summary h3{margin:0;font-family:"Playfair Display",serif;}
+    .summary p{margin:6px 0 0 0;color:var(--muted);}
+    .cta-btn{background:var(--accent);border:none;padding:12px 16px;border-radius:10px;font-weight:800;color:#082032;cursor:pointer;box-shadow:0 12px 36px rgba(255,183,3,0.12);}
 
-.media {
-  width: 100%;
-  max-height: 48vh;
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  background: #f6f6f6;
-  display: block;
-  object-fit: cover;
-  transition: opacity var(--fade-duration) ease;
-}
-.caption {
-  font-size: 1rem;
-  color: #333;
-  margin-top: 8px;
-}
+    /* Contact form (bottom) */
+    .contact{margin-top:28px;padding:18px;border-radius:12px;background:#fff;border:1px solid rgba(2,6,23,0.03);}
+    label{display:block;font-weight:600;margin-top:10px;margin-bottom:6px;}
+    input,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(2,6,23,0.06);font-size:0.95rem;}
+    .contact .row{display:flex;gap:12px;}
+    .contact .row > *{flex:1;}
 
-.exp-close {
-  position: fixed;
-  right: 18px;
-  top: 18px;
-  width: var(--close-size);
-  height: var(--close-size);
-  border-radius: 8px;
-  border: 0;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  cursor: pointer;
-  z-index: 12001;
-}
+    .muted{color:var(--muted);}
+    .small{font-size:0.9rem;color:var(--muted);}
 
-footer.note {
-  text-align: center;
-  color: #666;
-  padding: 18px;
-  font-size: 0.95rem;
-}
+    @media (max-width:720px){
+      .summary{flex-direction:column;align-items:flex-start;}
+      .summary .text{max-width:100%;}
+    }
 
-@media (max-width: 700px) {
-  .media { max-height: 40vh; }
-  .content { min-height: 50vh; padding: 20px; margin: 28px 10px; }
-}
-</style>
+    /* Reduced motion accessibility */
+    @media (prefers-reduced-motion: reduce){
+      .video-card, .video-card.in-view, .view-badge { transition: none !important; transform:none !important; }
+    }
+
+    /* helpful dev panel (small) */
+    .dev-panel{position:fixed;left:12px;bottom:12px;background:rgba(2,6,23,0.85);color:#fff;padding:8px 10px;border-radius:10px;font-size:0.85rem;z-index:9999}
+    .dev-panel button{background:transparent;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:6px 8px;border-radius:8px;cursor:pointer;font-weight:700}
+  </style>
 </head>
 <body>
-<div class="spacer">Scroll — cinematic fade + zoom + interactive parallax background ✨</div>
+  <div class="wrap">
 
-<section class="content" id="c1">
-  <div class="inner">
-    <svg class="media" viewBox="0 0 1200 700" role="img" aria-label="Section A illustration">
-      <defs>
-        <linearGradient id="gA" x1="0" x2="1">
-          <stop offset="0%" stop-color="#e0f7f1"/>
-          <stop offset="100%" stop-color="#a8e6dc"/>
-        </linearGradient>
-      </defs>
-      <rect width="1200" height="700" fill="url(#gA)"/>
-      <text x="50" y="90" font-size="44" fill="#0b5a4a">Section A</text>
-    </svg>
-    <div class="caption"><strong>Section A</strong></div>
+    <!-- Header -->
+    <header class="hero" id="top">
+      <div class="brand">
+        <div class="logo">PC</div>
+        <div>
+          <div style="font-weight:800">PURE CINEMA</div>
+          <div class="small muted">Vertical video showcase</div>
+        </div>
+      </div>
+
+      <h1>Six-video vertical showcase</h1>
+      <p class="lead">Below are your six test videos placed vertically. Click play on any video to start it. This demo highlights when a card is "in view" using IntersectionObserver.</p>
+    </header>
+
+    <!-- Videos list -->
+    <section class="videos" aria-label="Video list">
+
+      <!-- NOTE: change src to your files inside videos/ or to absolute URLs -->
+      <article class="video-card" id="card-0-webm">
+        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <header>
+          <div>
+            <div class="video-title">0.webm</div>
+            <div class="video-desc small muted">Test clip — webm format. Replace description.</div>
+          </div>
+          <div class="small muted">Duration: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/0.webm" type="video/webm">
+            <source src="videos/0.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+      <article class="video-card" id="card-0-mp4">
+        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <header>
+          <div>
+            <div class="video-title">0.mp4</div>
+            <div class="video-desc small muted">MP4 copy of clip 0.</div>
+          </div>
+          <div class="small muted">Resolution: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/0.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+      <article class="video-card" id="card-1-webm">
+        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <header>
+          <div>
+            <div class="video-title">1.webm</div>
+            <div class="video-desc small muted">WebM version of clip 1.</div>
+          </div>
+          <div class="small muted">Notes: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/1.webm" type="video/webm">
+            <source src="videos/1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+      <article class="video-card" id="card-1-mp4">
+        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <header>
+          <div>
+            <div class="video-title">1.mp4</div>
+            <div class="video-desc small muted">MP4 variant of clip 1.</div>
+          </div>
+          <div class="small muted">Frame rate: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+      <article class="video-card" id="card-2-webm">
+        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <header>
+          <div>
+            <div class="video-title">2.webm</div>
+            <div class="video-desc small muted">WebM version of clip 2.</div>
+          </div>
+          <div class="small muted">Codec: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/2.webm" type="video/webm">
+            <source src="videos/2.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+      <article class="video-card" id="card-2-mp4">
+        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <header>
+          <div>
+            <div class="video-title">2.mp4</div>
+            <div class="video-desc small muted">MP4 of clip 2.</div>
+          </div>
+          <div class="small muted">Bitrate: —</div>
+        </header>
+        <div class="video-el">
+          <video controls preload="none" playsinline>
+            <source src="videos/2.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- Summary + CTA -->
+    <section class="summary" aria-labelledby="summary-heading">
+      <div class="text">
+        <h3 id="summary-heading">Quick summary</h3>
+        <p class="muted">Six clips shown above for quick review. Pick a clip to play and note timecodes or frames you want graded or cut.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-end;">
+        <button class="cta-btn" id="ctaContact">Contact to Book a Review</button>
+        <div class="small muted">Or email: <a href="mailto:hello@purecinema.example">hello@purecinema.example</a></div>
+      </div>
+    </section>
+
+    <!-- Contact form (simple stub) -->
+    <section class="contact" id="contactForm" aria-label="Contact form">
+      <h3 style="margin:0 0 8px 0;">Contact / Project brief</h3>
+      <form onsubmit="return false;">
+        <label for="name">Full name</label>
+        <input id="name" name="name" placeholder="Your name" required>
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" required>
+
+        <label for="notes">Notes / Which clip(s) — include timecodes</label>
+        <textarea id="notes" name="notes" rows="4" placeholder="Example: clip 1.mp4 — 00:01:24 to 00:01:42 — please grade shadows"></textarea>
+
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <button class="cta-btn" id="sendBtn">Send request</button>
+          <div class="small muted" id="formStatus">We'll reply within 48 hours.</div>
+        </div>
+      </form>
+    </section>
+
   </div>
-</section>
 
-<section class="content" id="c2">
-  <div class="inner">
-    <svg class="media" viewBox="0 0 1200 700" role="img" aria-label="Section B illustration">
-      <rect width="1200" height="700" fill="#ffd9b3"/>
-      <text x="60" y="92" font-size="44" fill="#5a3a28">Section B</text>
-    </svg>
-    <div class="caption"><strong>Section B</strong></div>
+  <!-- small developer panel -->
+  <div class="dev-panel" aria-hidden="true">
+    Observer: <strong id="devStatus">active</strong>
+    <button id="toggleObserver" title="Enable/disable observer" style="margin-left:8px">toggle</button>
   </div>
-</section>
 
-<section class="content" id="c3">
-  <div class="inner">
-    <video class="media" src="videos/0.webm" muted autoplay loop playsinline controls></video>
-    <div class="caption"><strong>Section C</strong> — videos/0.webm</div>
-  </div>
-</section>
+  <script>
+    // Scroll CTA to contact form
+    document.getElementById('ctaContact').addEventListener('click', () => {
+      document.getElementById('contactForm').scrollIntoView({behavior:'smooth', block:'center'});
+    });
 
-<section class="content" id="c4">
-  <div class="inner">
-    <video class="media" src="videos/0.mp4" muted autoplay loop playsinline controls></video>
-    <div class="caption"><strong>Section D</strong> — videos/0.mp4</div>
-  </div>
-</section>
+    // Simple form "send" simulation - replace with your API
+    const sendBtn = document.getElementById('sendBtn');
+    const formStatus = document.getElementById('formStatus');
+    sendBtn.addEventListener('click', () => {
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+      // simulate network
+      setTimeout(() => {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send request';
+        formStatus.textContent = 'Request sent — we will reply within 48 hours.';
+        document.getElementById('name').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('notes').value = '';
+      }, 900);
+    });
 
-<div class="spacer"></div>
-<footer class="note">
-  ✨ Smooth fade + zoom sections with an interactive parallax background that follows your cursor.
-</footer>
+    // Pause other videos when one plays
+    document.querySelectorAll('.video-el video').forEach((video) => {
+      video.addEventListener('play', () => {
+        document.querySelectorAll('.video-el video').forEach((other) => {
+          if(other !== video) other.pause();
+        });
+      });
+    });
 
-<script>
-(()=>{
-  const sections=[...document.querySelectorAll('.content')];
-  let current=null,closeBtn=null;
+    // Write duration after metadata loads (keeps original behavior)
+    document.querySelectorAll('.video-el video').forEach((v) => {
+      v.addEventListener('loadedmetadata', () => {
+        const card = v.closest('.video-card');
+        const secs = Math.round(v.duration || 0);
+        const mins = Math.floor(secs/60);
+        const rem = secs % 60;
+        const endNote = card.querySelector('header .small');
+        if(endNote) endNote.textContent = `${mins}:${rem.toString().padStart(2,'0')} • ${secs}s`;
+      });
+    });
 
-  function makeClose(){
-    if(closeBtn)return;
-    closeBtn=document.createElement('button');
-    closeBtn.className='exp-close';
-    closeBtn.textContent='✕';
-    closeBtn.title='Close';
-    closeBtn.onclick=()=>deactivate(current);
-    document.body.appendChild(closeBtn);
-  }
-  function removeClose(){
-    if(!closeBtn)return;
-    closeBtn.remove();
-    closeBtn=null;
-  }
-  function activate(sec){
-    if(current===sec)return;
-    if(current)deactivate(current);
-    sec.classList.add('active');
-    makeClose();
-    current=sec;
-  }
-  function deactivate(sec){
-    if(!sec)return;
-    sec.classList.remove('active');
-    current=null;
-    removeClose();
-  }
+    /* ----------------------------
+       IntersectionObserver demo
+       - toggles .in-view on video-card elements
+       - uses rootMargin and threshold tuned for vertical cards
+       ----------------------------*/
+    (function(){
+      const cards = document.querySelectorAll('.video-card');
+      if(!('IntersectionObserver' in window)) {
+        // fallback: mark first card as in-view
+        if(cards[0]) cards[0].classList.add('in-view');
+        document.getElementById('devStatus').textContent = 'not-supported';
+        return;
+      }
 
-  // Intersection observer for switching
-  const obs=new IntersectionObserver(entries=>{
-    const visible=entries.filter(e=>e.isIntersecting)
-      .sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
-    if(!visible)return;
-    activate(visible.target);
-  },{threshold:0.5});
-  sections.forEach(s=>obs.observe(s));
-  if(sections[0])sections[0].classList.add('active');
+      const options = {
+        root: null,
+        rootMargin: '0px 0px -30% 0px', // make "in view" trigger slightly earlier
+        threshold: 0.45 // ~45% visible
+      };
 
-  // Close on ESC or click outside
-  window.addEventListener('keydown',e=>{
-    if(e.key==='Escape')deactivate(current);
-  });
-  document.addEventListener('click',e=>{
-    if(!current)return;
-    if(current.contains(e.target))return;
-    if(closeBtn&&closeBtn.contains(e.target))return;
-    deactivate(current);
-  },true);
+      const onChange = (entries) => {
+        entries.forEach(entry => {
+          const el = entry.target;
+          if(entry.isIntersecting){
+            el.classList.add('in-view');
+            // optional: you might want to autoplay a small preview when in-view (careful with UX)
+            // const vid = el.querySelector('video');
+            // vid?.play()?.catch(()=>{/* autoplay blocked */});
+          } else {
+            el.classList.remove('in-view');
+            // stop any autoplayed previews:
+            // const vid = el.querySelector('video'); vid?.pause();
+          }
+        });
+      };
 
-  // Interactive parallax: move background based on cursor position
-  const bg=document.body;
-  let mouseX=0,mouseY=0;
-  window.addEventListener('mousemove',e=>{
-    // Normalize to range -0.5 to 0.5
-    const x=(e.clientX/window.innerWidth)-0.5;
-    const y=(e.clientY/window.innerHeight)-0.5;
-    mouseX=x*20; // smaller multiplier = gentler movement
-    mouseY=y*20;
-    // apply using background-position with CSS variable-like effect
-    bg.style.setProperty('--bg-pos-x',`${50+mouseX}%`);
-    bg.style.setProperty('--bg-pos-y',`${50+mouseY}%`);
-    bg.style.backgroundPosition=`${50+mouseX}% ${50+mouseY}%`;
-  });
-})();
-</script>
+      let observer = new IntersectionObserver(onChange, options);
+      cards.forEach(c => observer.observe(c));
+
+      // dev toggle
+      const devStatus = document.getElementById('devStatus');
+      const toggleBtn = document.getElementById('toggleObserver');
+      let enabled = true;
+      toggleBtn.addEventListener('click', () => {
+        enabled = !enabled;
+        if(enabled){
+          cards.forEach(c => observer.observe(c));
+          devStatus.textContent = 'active';
+          toggleBtn.textContent = 'toggle';
+        } else {
+          cards.forEach(c => observer.unobserve(c));
+          // clear classes
+          cards.forEach(c => c.classList.remove('in-view'));
+          devStatus.textContent = 'paused';
+          toggleBtn.textContent = 'toggle';
+        }
+      });
+
+      // Expose for console testing:
+      window.__pcObserver = { observer, cards };
+    })();
+  </script>
 </body>
 </html>

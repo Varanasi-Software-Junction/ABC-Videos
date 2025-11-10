@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cinematic Scroll + Autoplay + Selector</title>
+<style>
+:root{
+  --bg:#f7f7f7;
+  --box-bg:#fff;
+  --fade-duration:900ms;
+  --zoom-scale:1.05;
+  --close-size:44px;
+  --parallax-max:12;
+}
+
+/* reset */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:#111;overflow-x:hidden;scroll-behavior:smooth}
+body{perspective:1000px}
+
+/* Fixed animation selector */
+.anim-selector{
+  position:fixed;top:14px;right:14px;z-index:12010;
+  background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);
+  border:1px solid rgba(0,0,0,0.1);border-radius:10px;
+  padding:8px 12px;box-shadow:0 6px 24px rgba(0,0,0,0.15);
+  font-size:0.9rem;display:flex;align-items:center;gap:6px;
+}
+.anim-selector label{font-weight:600;color:#333;}
+.anim-selector select{
+  padding:4px 6px;border-radius:6px;border:1px solid #ccc;
+  background:#fff;cursor:pointer;font-size:0.9rem;
+}
+
+/* background */
+.bg-layer{
+  position:fixed;inset:0;z-index:-1;
+  background:radial-gradient(circle at 30% 40%,#d8eaff,#fefefe 70%);
+  background-size:200% 200%;
+  animation:bgDrift 25s ease-in-out infinite alternate;
+}
+@keyframes bgDrift{
+  0%{background-position:0% 0%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 100%}
+}
+
+/* sections */
+.spacer{height:100vh;display:flex;align-items:center;justify-content:center;color:#666;font-size:1.1rem;text-align:center;padding:0 16px}
+.content{
+  min-height:60vh;margin:48px 12px;display:flex;align-items:center;justify-content:center;
+  background:var(--box-bg);border-radius:14px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.08);
+  padding:28px;text-align:center;overflow:hidden;position:relative;
+  opacity:0;transform:scale(1);
+  transition:opacity var(--fade-duration) ease,transform var(--fade-duration) ease;
+}
+.content:hover{transform:scale(1.02);transition:transform 0.3s ease;}
+.content.active{opacity:1;transform:scale(var(--zoom-scale));z-index:5;}
+.inner{max-width:900px;width:100%;display:flex;flex-direction:column;align-items:center;gap:18px;}
+.media{
+  width:100%;max-height:48vh;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.08);
+  display:block;object-fit:cover;opacity:0;
+  transform:translateY(10px) scale(0.98);
+}
+.caption{font-size:1rem;color:#333;margin-top:8px;opacity:0;transition:opacity 0.6s ease;}
+.content.active .caption{opacity:1}
+
+/* Animation presets */
+@keyframes fadeZoom{0%{opacity:0;transform:scale(0.95)}100%{opacity:1;transform:scale(1)}}
+@keyframes slideUp{0%{opacity:0;transform:translateY(40px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes rotate3D{0%{opacity:0;transform:rotateY(30deg) scale(0.9)}100%{opacity:1;transform:rotateY(0deg) scale(1)}}
+@keyframes blurPop{0%{opacity:0;filter:blur(6px);transform:scale(0.9)}100%{opacity:1;filter:blur(0);transform:scale(1)}}
+@keyframes softLift{0%{opacity:0;transform:translateY(20px) scale(0.98)}100%{opacity:1;transform:translateY(0) scale(1.02)}}
+@keyframes cinematicZoom{
+  0%{opacity:0;transform:scale(0.98) translateY(8px) rotateX(2deg);filter:brightness(0.9) blur(2px);}
+  50%{opacity:1;transform:scale(1.02) translateY(-2px) rotateX(0.5deg);filter:brightness(1.05);}
+  100%{opacity:1;transform:scale(1) translateY(0) rotateX(0);filter:none;}
+}
+
+/* animated class */
+.media.animated{
+  animation-duration:1s;
+  animation-timing-function:cubic-bezier(.2,.9,.2,1);
+  animation-fill-mode:both;
+}
+
+/* smaller screens */
+@media(max-width:700px){
+  .media{max-height:40vh}
+  .content{min-height:50vh;padding:20px;margin:28px 10px}
+}
+
+/* close button */
+.exp-close{
+  position:fixed;right:18px;top:18px;width:var(--close-size);height:var(--close-size);
+  border-radius:8px;border:0;background:rgba(255,255,255,0.95);
+  box-shadow:0 8px 24px rgba(0,0,0,0.18);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:600;cursor:pointer;z-index:12001;
+}
+</style>
+</head>
+<body>
+
+<!-- Fixed selector -->
+<div class="anim-selector" role="region" aria-label="Animation Selector">
+  <label for="animType">Animation:</label>
+  <select id="animType" aria-label="Choose animation">
+    <option value="fadeZoom">Fade + Zoom</option>
+    <option value="slideUp">Slide Up</option>
+    <option value="rotate3D">Rotate 3D</option>
+    <option value="blurPop">Blur Pop</option>
+    <option value="softLift">Soft Lift</option>
+    <option value="cinematicZoom" selected>Cinematic Zoom</option>
+  </select>
+</div>
+
+<div class="bg-layer" id="bgLayer" aria-hidden="true"></div>
+
+<div class="spacer">Scroll — cinematic fade + zoom + autoplay videos + parallax background ✨</div>
+
+<section class="content" id="c1">
+  <div class="inner">
+    <svg class="media" viewBox="0 0 1200 700">
+      <rect width="1200" height="700" fill="#a8e6dc"/>
+      <text x="50" y="90" font-size="44" fill="#0b5a4a">Section A</text>
+    </svg>
+    <div class="caption"><strong>Section A</strong></div>
+  </div>
+</section>
+
+<section class="content" id="c2">
+  <div class="inner">
+    <svg class="media" viewBox="0 0 1200 700">
+      <rect width="1200" height="700" fill="#ffd9b3"/>
+      <text x="60" y="92" font-size="44" fill="#5a3a28">Section B</text>
+    </svg>
+    <div class="caption"><strong>Section B</strong></div>
+  </div>
+</section>
+
+<section class="content" id="c3">
+  <div class="inner">
+    <video class="media" src="videos/0.webm" muted playsinline loop preload="auto" onerror="this.src='videos/0.mp4'"></video>
+    <div class="caption"><strong>Section C</strong> — videos/0.webm</div>
+  </div>
+</section>
+
+<section class="content" id="c4">
+  <div class="inner">
+    <video class="media" src="videos/0.mp4" muted playsinline loop preload="auto"></video>
+    <div class="caption"><strong>Section D</strong> — videos/0.mp4</div>
+  </div>
+</section>
+
+<div class="spacer"></div>
+
+<footer style="text-align:center;color:#666;padding:18px;font-size:0.9rem;">
+  Created by <a href="https://abc-videos.com" target="_blank" rel="noopener" style="color:#666;text-decoration:underline;">ABC-Videos.com</a>   
+</footer></body></html>
