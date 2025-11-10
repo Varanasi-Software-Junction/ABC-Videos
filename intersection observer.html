@@ -1,10 +1,10 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pure Cinema — Vertical Video Showcase (Observer demo)</title>
-  <meta name="description" content="Six-video vertical showcase — observer demo" />
+  <title>Pure Cinema — Vertical Video Showcase (Cinematic + Preview)</title>
+  <meta name="description" content="Six-video vertical showcase — cinematic reveal + muted preview autoplay when in view" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -16,9 +16,12 @@
       --card:#fbfbfb;
       --radius:12px;
       --maxw:1100px;
+      --film-ease: cubic-bezier(.15,.9,.2,1);
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
     }
+
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{margin:0;background:linear-gradient(180deg,#fff,#fcfbf8);color:var(--ink);-webkit-font-smoothing:antialiased;}
     .wrap{max-width:var(--maxw);margin:0 auto;padding:28px;}
 
@@ -35,38 +38,96 @@
     header h1{margin:0;font-family:"Playfair Display",serif;font-size:clamp(1.6rem,3.5vw,2.6rem);}
     header p.lead{margin:0;color:var(--muted);max-width:70ch;font-size:1.03rem;}
 
-    /* Video cards */
+    /* Video cards container */
     .videos { display:flex;flex-direction:column; gap:18px; margin-bottom:36px; }
+
+    /* Card baseline */
     .video-card{
-      background:var(--card); border-radius:var(--radius); padding:14px; display:flex; flex-direction:column; gap:10px;
-      box-shadow:0 8px 22px rgba(2,6,23,0.03); border:1px solid rgba(2,6,23,0.03);
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      box-shadow:0 8px 22px rgba(2,6,23,0.03);
+      border:1px solid rgba(2,6,23,0.03);
       transform-origin:center;
-      transition:transform 420ms cubic-bezier(.2,.9,.2,1), box-shadow 420ms ease, filter 420ms ease;
-      will-change:transform, box-shadow;
+      /* quiet starting state for cinematic reveal: slightly lower, slightly smaller, mostly transparent */
+      opacity:0;
+      transform: translateY(18px) scale(0.994) rotateX(0.6deg);
+      transition:
+        opacity 520ms var(--film-ease),
+        transform 520ms var(--film-ease),
+        box-shadow 520ms ease,
+        filter 520ms ease;
+      will-change: transform, opacity, box-shadow;
       position:relative;
       isolation:isolate;
+      overflow:visible;
     }
-    /* the 'in view' styling applied by IntersectionObserver */
+
+    /* Card shown state: cinematic lift + zoom + shadow */
     .video-card.in-view{
-      transform: translateY(-12px) rotateX(1deg) scale(1.02);
+      opacity:1;
+      transform: translateY(-12px) scale(1.02) rotateX(0.4deg);
       box-shadow:0 26px 48px rgba(2,6,23,0.12);
       filter:brightness(1.02);
     }
+
     .video-card header{display:flex;align-items:center;justify-content:space-between;gap:12px;}
     .video-title{font-weight:700;}
     .video-desc{color:var(--muted);font-size:0.95rem;margin:0;}
-    .video-el{width:100%;border-radius:10px;overflow:hidden;background:#000;}
-    video{width:100%;height:auto;display:block;background:#000;}
+    .video-el{width:100%;border-radius:10px;overflow:hidden;background:#000;position:relative;}
 
-    /* small view badge used for testing */
+    /* actual <video> stays fluid; avoid animating large bitmaps where possible */
+    .video-el video{width:100%;height:auto;display:block;background:#000;transform-origin:center;display:block;}
+
+    /* sheen sweep: subtle film-like highlight on reveal
+       created with a pseudo element so it doesn't repaint the video pixels themselves */
+    .video-el::after{
+      content:'';
+      position:absolute;
+      left:-120%;
+      top:0;
+      height:100%;
+      width:60%;
+      pointer-events:none;
+      transform:translateX(0) skewX(-12deg);
+      background:linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+      opacity:0;
+    }
+
+    /* when card appears, run a very short sweep */
+    .video-card.in-view .video-el::after{
+      animation: sheen 880ms var(--film-ease) 1;
+      opacity:1;
+    }
+
+    @keyframes sheen{
+      0% { left:-120%; opacity:0; transform:translateX(0) skewX(-12deg) }
+      10% { opacity:0.85 }
+      60% { left:120%; opacity:0.35; transform:translateX(0) skewX(-6deg) }
+      100% { left:120%; opacity:0 }
+    }
+
+    /* View badge for testing (keeps previous behavior) */
     .view-badge{
       position:absolute;right:12px;top:12px;padding:6px 8px;border-radius:8px;font-weight:700;font-size:0.8rem;
       background:rgba(3,7,18,0.9); color:var(--accent); display:inline-flex;align-items:center;gap:8px;
       box-shadow:0 6px 18px rgba(2,6,23,0.12);
       opacity:0; transform:translateY(-6px); transition:opacity 260ms ease, transform 260ms ease;
       pointer-events:none;
+      z-index:4;
     }
     .video-card.in-view .view-badge{ opacity:1; transform:translateY(0); }
+
+    /* preview indicator while autoplay active */
+    .preview-dot{
+      width:8px;height:8px;border-radius:50%;background:var(--accent-dark);display:inline-block;
+      box-shadow:0 4px 10px rgba(212,138,0,0.18);
+      vertical-align:middle;margin-left:8px;opacity:0;transform:scale(.9);transition:opacity 220ms ease, transform 220ms ease;
+    }
+    .video-card.previewing .preview-dot{ opacity:1; transform:scale(1); }
 
     /* Summary & CTA */
     .summary{padding:20px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff);box-shadow:0 8px 20px rgba(2,6,23,0.02);display:flex;gap:18px;align-items:center;justify-content:space-between;}
@@ -90,12 +151,12 @@
       .summary .text{max-width:100%;}
     }
 
-    /* Reduced motion accessibility */
+    /* Reduced motion: remove transitions/animations and disable preview autoplay as accessibility measure */
     @media (prefers-reduced-motion: reduce){
-      .video-card, .video-card.in-view, .view-badge { transition: none !important; transform:none !important; }
+      .video-card, .video-card.in-view, .video-el::after { transition: none !important; animation: none !important; transform:none !important; opacity:1 !important; }
     }
 
-    /* helpful dev panel (small) */
+    /* Dev panel */
     .dev-panel{position:fixed;left:12px;bottom:12px;background:rgba(2,6,23,0.85);color:#fff;padding:8px 10px;border-radius:10px;font-size:0.85rem;z-index:9999}
     .dev-panel button{background:transparent;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:6px 8px;border-radius:8px;cursor:pointer;font-weight:700}
   </style>
@@ -114,24 +175,25 @@
       </div>
 
       <h1>Six-video vertical showcase</h1>
-      <p class="lead">Below are your six test videos placed vertically. Click play on any video to start it. This demo highlights when a card is "in view" using IntersectionObserver.</p>
+      <p class="lead">Scroll to reveal: each clip fades, lifts and gently zooms into view. When conditions allow, a muted preview will auto-play while the card is in view — it pauses when scrolled away.</p>
     </header>
 
     <!-- Videos list -->
     <section class="videos" aria-label="Video list">
 
-      <!-- NOTE: change src to your files inside videos/ or to absolute URLs -->
+      <!-- Video 0.webm -->
       <article class="video-card" id="card-0-webm">
-        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <div class="view-badge" aria-hidden="true">IN VIEW <span class="preview-dot" aria-hidden="true"></span></div>
         <header>
           <div>
             <div class="video-title">0.webm</div>
-            <div class="video-desc small muted">Test clip — webm format. Replace description.</div>
+            <div class="video-desc small muted">Test clip — webm format. Replace this description with project-specific notes.</div>
           </div>
           <div class="small muted">Duration: —</div>
         </header>
-        <div class="video-el">
-          <video controls preload="none" playsinline>
+        <div class="video-el" aria-hidden="false">
+          <!-- preload metadata to allow quick preview start; autoplay will be muted programmatically -->
+          <video controls preload="metadata" playsinline>
             <source src="videos/0.webm" type="video/webm">
             <source src="videos/0.mp4" type="video/mp4">
             Your browser does not support the video tag.
@@ -139,25 +201,27 @@
         </div>
       </article>
 
+      <!-- Video 0.mp4 -->
       <article class="video-card" id="card-0-mp4">
-        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <div class="view-badge" aria-hidden="true">IN VIEW <span class="preview-dot" aria-hidden="true"></span></div>
         <header>
           <div>
             <div class="video-title">0.mp4</div>
-            <div class="video-desc small muted">MP4 copy of clip 0.</div>
+            <div class="video-desc small muted">MP4 copy of clip 0 — good for broad compatibility.</div>
           </div>
           <div class="small muted">Resolution: —</div>
         </header>
         <div class="video-el">
-          <video controls preload="none" playsinline>
+          <video controls preload="metadata" playsinline>
             <source src="videos/0.mp4" type="video/mp4">
             Your browser does not support the video tag.
           </video>
         </div>
       </article>
 
+      <!-- Video 1.webm -->
       <article class="video-card" id="card-1-webm">
-        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <div class="view-badge" aria-hidden="true">IN VIEW <span class="preview-dot" aria-hidden="true"></span></div>
         <header>
           <div>
             <div class="video-title">1.webm</div>
@@ -166,7 +230,7 @@
           <div class="small muted">Notes: —</div>
         </header>
         <div class="video-el">
-          <video controls preload="none" playsinline>
+          <video controls preload="metadata" playsinline>
             <source src="videos/1.webm" type="video/webm">
             <source src="videos/1.mp4" type="video/mp4">
             Your browser does not support the video tag.
@@ -174,8 +238,9 @@
         </div>
       </article>
 
+      <!-- Video 1.mp4 -->
       <article class="video-card" id="card-1-mp4">
-        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <div class="view-badge" aria-hidden="true">IN VIEW <span class="preview-dot" aria-hidden="true"></span></div>
         <header>
           <div>
             <div class="video-title">1.mp4</div>
@@ -184,24 +249,25 @@
           <div class="small muted">Frame rate: —</div>
         </header>
         <div class="video-el">
-          <video controls preload="none" playsinline>
+          <video controls preload="metadata" playsinline>
             <source src="videos/1.mp4" type="video/mp4">
             Your browser does not support the video tag.
           </video>
         </div>
       </article>
 
+      <!-- Video 2.webm -->
       <article class="video-card" id="card-2-webm">
-        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <div class="view-badge" aria-hidden="true">IN VIEW <span class="preview-dot" aria-hidden="true"></span></div>
         <header>
           <div>
             <div class="video-title">2.webm</div>
-            <div class="video-desc small muted">WebM version of clip 2.</div>
+            <div class="video-desc small muted">WebM version of clip 2 — use for testing codecs.</div>
           </div>
           <div class="small muted">Codec: —</div>
         </header>
         <div class="video-el">
-          <video controls preload="none" playsinline>
+          <video controls preload="metadata" playsinline>
             <source src="videos/2.webm" type="video/webm">
             <source src="videos/2.mp4" type="video/mp4">
             Your browser does not support the video tag.
@@ -209,17 +275,18 @@
         </div>
       </article>
 
+      <!-- Video 2.mp4 -->
       <article class="video-card" id="card-2-mp4">
-        <div class="view-badge" aria-hidden="true">IN VIEW</div>
+        <div class="view-badge" aria-hidden="true">IN VIEW <span class="preview-dot" aria-hidden="true"></span></div>
         <header>
           <div>
             <div class="video-title">2.mp4</div>
-            <div class="video-desc small muted">MP4 of clip 2.</div>
+            <div class="video-desc small muted">MP4 of clip 2 — compatible with older browsers and devices.</div>
           </div>
           <div class="small muted">Bitrate: —</div>
         </header>
         <div class="video-el">
-          <video controls preload="none" playsinline>
+          <video controls preload="metadata" playsinline>
             <source src="videos/2.mp4" type="video/mp4">
             Your browser does not support the video tag.
           </video>
@@ -232,7 +299,7 @@
     <section class="summary" aria-labelledby="summary-heading">
       <div class="text">
         <h3 id="summary-heading">Quick summary</h3>
-        <p class="muted">Six clips shown above for quick review. Pick a clip to play and note timecodes or frames you want graded or cut.</p>
+        <p class="muted">Six clips shown above for quick review. Pick a clip to play and note timecodes or frames you want graded or cut. Muted auto-preview helps quickly scan reels without noise — you can always unmute or manually play any clip.</p>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-end;">
@@ -270,18 +337,47 @@
   </div>
 
   <script>
-    // Scroll CTA to contact form
+    // ---------- Helpers: Network & accessibility checks ----------
+    function allowsAutoPreview() {
+      // Don't autoplay if user prefers reduced motion.
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+
+      // Respect Save-Data and poor connections when possible.
+      try {
+        const nav = navigator;
+        // navigator.connection may be undefined in some browsers
+        const conn = nav.connection || nav.mozConnection || nav.webkitConnection;
+        if (conn) {
+          // If user has enabled Save-Data, avoid autoplaying previews.
+          if (conn.saveData) return false;
+
+          // effectiveType like '4g', '3g', '2g', 'slow-2g'.
+          const et = (conn.effectiveType || '').toLowerCase();
+          // Prefer autoplay on 4g (fast) or when type explicitly wifi.
+          if (et === '4g' || (conn.type && conn.type.toLowerCase() === 'wifi')) return true;
+
+          // otherwise avoid autoplay on weaker connections.
+          return false;
+        }
+      } catch (e) {
+        // fall through to default allow
+      }
+
+      // If we can't determine network, allow autoplay (muted) — browser will block if it disallows it
+      return true;
+    }
+
+    // ---------- UI wiring ----------
     document.getElementById('ctaContact').addEventListener('click', () => {
       document.getElementById('contactForm').scrollIntoView({behavior:'smooth', block:'center'});
     });
 
-    // Simple form "send" simulation - replace with your API
+    // Send simulation
     const sendBtn = document.getElementById('sendBtn');
     const formStatus = document.getElementById('formStatus');
     sendBtn.addEventListener('click', () => {
       sendBtn.disabled = true;
       sendBtn.textContent = 'Sending...';
-      // simulate network
       setTimeout(() => {
         sendBtn.disabled = false;
         sendBtn.textContent = 'Send request';
@@ -292,34 +388,51 @@
       }, 900);
     });
 
-    // Pause other videos when one plays
+    // ---------- Video playback management ----------
+    // Pause other videos when one plays (user-initiated or autoplay).
+    function pauseAllExcept(currentVideo) {
+      document.querySelectorAll('.video-el video').forEach((other) => {
+        if (other !== currentVideo) {
+          try { other.pause(); } catch(e) {}
+          // clear preview flag visuals on other cards
+          const oc = other.closest('.video-card');
+          if (oc) oc.classList.remove('previewing');
+        }
+      });
+    }
+
+    // Track if a user manually played a video so we don't override user intent later.
     document.querySelectorAll('.video-el video').forEach((video) => {
-      video.addEventListener('play', () => {
-        document.querySelectorAll('.video-el video').forEach((other) => {
-          if(other !== video) other.pause();
-        });
+      // Mark as user-initiated if the play event is trusted (user click/tap).
+      video.addEventListener('play', (ev) => {
+        if (ev.isTrusted) {
+          video.__userPlayed = true;
+          pauseAllExcept(video);
+          // when user plays, visually indicate previewing state removed (we don't mark as previewing)
+          const card = video.closest('.video-card');
+          if (card) card.classList.remove('previewing');
+        }
+      });
+
+      // Track manual unmute: if user unmutes, set a flag so we don't remute programmatically later.
+      video.addEventListener('volumechange', () => {
+        video.__userChangedMute = true;
+      });
+
+      // If playback ends naturally (or was paused), clear previewing visual.
+      video.addEventListener('pause', () => {
+        const card = video.closest('.video-card');
+        if (card) card.classList.remove('previewing');
+      });
+      video.addEventListener('ended', () => {
+        const card = video.closest('.video-card');
+        if (card) card.classList.remove('previewing');
       });
     });
 
-    // Write duration after metadata loads (keeps original behavior)
-    document.querySelectorAll('.video-el video').forEach((v) => {
-      v.addEventListener('loadedmetadata', () => {
-        const card = v.closest('.video-card');
-        const secs = Math.round(v.duration || 0);
-        const mins = Math.floor(secs/60);
-        const rem = secs % 60;
-        const endNote = card.querySelector('header .small');
-        if(endNote) endNote.textContent = `${mins}:${rem.toString().padStart(2,'0')} • ${secs}s`;
-      });
-    });
-
-    /* ----------------------------
-       IntersectionObserver demo
-       - toggles .in-view on video-card elements
-       - uses rootMargin and threshold tuned for vertical cards
-       ----------------------------*/
+    // ---------- IntersectionObserver: reveal + preview ----------
     (function(){
-      const cards = document.querySelectorAll('.video-card');
+      const cards = Array.from(document.querySelectorAll('.video-card'));
       if(!('IntersectionObserver' in window)) {
         // fallback: mark first card as in-view
         if(cards[0]) cards[0].classList.add('in-view');
@@ -327,32 +440,82 @@
         return;
       }
 
+      const canAutoPreview = allowsAutoPreview();
+      // debug in dev panel
+      document.getElementById('devStatus').textContent = canAutoPreview ? 'active (preview enabled)' : 'active (preview disabled)';
+
       const options = {
         root: null,
-        rootMargin: '0px 0px -30% 0px', // make "in view" trigger slightly earlier
-        threshold: 0.45 // ~45% visible
+        rootMargin: '0px 0px -30% 0px', // trigger when card is roughly 45% visible
+        threshold: 0.45
       };
 
       const onChange = (entries) => {
         entries.forEach(entry => {
-          const el = entry.target;
-          if(entry.isIntersecting){
-            el.classList.add('in-view');
-            // optional: you might want to autoplay a small preview when in-view (careful with UX)
-            // const vid = el.querySelector('video');
-            // vid?.play()?.catch(()=>{/* autoplay blocked */});
+          const elCard = entry.target;
+          const video = elCard.querySelector('video');
+
+          if (entry.isIntersecting) {
+            // Add cinematic visible state
+            elCard.classList.add('in-view');
+
+            // Autoplay preview: only if allowed by heuristics and user hasn't played manually
+            if (canAutoPreview && video && !video.__userPlayed && !video.__previewAttempted) {
+              // remember preview attempted to avoid repeated attempts (helps for mobile & power/perf)
+              video.__previewAttempted = true;
+
+              // mute programmatically for autoplay; preserve flag if user already changed mute earlier
+              const prevMuted = video.muted;
+              if (!video.__userChangedMute) video.muted = true;
+
+              // start preview; browsers may block programmatic play if not allowed — catch errors
+              const playPromise = video.play();
+              if (playPromise && typeof playPromise.then === 'function') {
+                playPromise.then(() => {
+                  // show preview visuals
+                  elCard.classList.add('previewing');
+                  pauseAllExcept(video);
+                }).catch(() => {
+                  // autoplay blocked — clear previewing state and fallback to no-op
+                  elCard.classList.remove('previewing');
+                });
+              } else {
+                // older browsers: assume play started
+                elCard.classList.add('previewing');
+                pauseAllExcept(video);
+              }
+
+              // if the user had previously unmuted, don't force restore; otherwise restore on pause/exit
+              if (!video.__userChangedMute) {
+                // restore muted state when preview ends or card leaves; handled on exit below
+                video.__previewMutedInitially = prevMuted;
+              }
+            }
           } else {
-            el.classList.remove('in-view');
-            // stop any autoplayed previews:
-            // const vid = el.querySelector('video'); vid?.pause();
+            // remove cinematic visible state
+            elCard.classList.remove('in-view');
+
+            // If this video was previewing and NOT user-initiated, pause it and restore muted state
+            if (video) {
+              // If user played manually, don't pause (they likely want it playing)
+              const shouldPause = !video.__userPlayed;
+              if (shouldPause) {
+                try { video.pause(); } catch (e) {}
+                // restore mute if we changed it for preview
+                if (!video.__userChangedMute && typeof video.__previewMutedInitially !== 'undefined') {
+                  video.muted = !!video.__previewMutedInitially;
+                }
+              }
+              elCard.classList.remove('previewing');
+            }
           }
         });
       };
 
-      let observer = new IntersectionObserver(onChange, options);
+      const observer = new IntersectionObserver(onChange, options);
       cards.forEach(c => observer.observe(c));
 
-      // dev toggle
+      // Dev toggle
       const devStatus = document.getElementById('devStatus');
       const toggleBtn = document.getElementById('toggleObserver');
       let enabled = true;
@@ -360,19 +523,19 @@
         enabled = !enabled;
         if(enabled){
           cards.forEach(c => observer.observe(c));
-          devStatus.textContent = 'active';
-          toggleBtn.textContent = 'toggle';
+          devStatus.textContent = canAutoPreview ? 'active (preview enabled)' : 'active (preview disabled)';
         } else {
           cards.forEach(c => observer.unobserve(c));
-          // clear classes
-          cards.forEach(c => c.classList.remove('in-view'));
+          cards.forEach(c => {
+            c.classList.remove('in-view','previewing');
+            const v = c.querySelector('video'); if (v && !v.__userPlayed) try{ v.pause(); }catch(e){}
+          });
           devStatus.textContent = 'paused';
-          toggleBtn.textContent = 'toggle';
         }
       });
 
       // Expose for console testing:
-      window.__pcObserver = { observer, cards };
+      window.__pcObserver = { observer, cards, allowsAutoPreview: canAutoPreview };
     })();
   </script>
 </body>
