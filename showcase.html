@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SVG Animation Showcase</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      justify-items: center;
+    }
+    svg {
+      width: 100px;
+      height: 100px;
+      cursor: pointer;
+    }
+    .anim1:hover { transform: translateY(-20px); transition: transform 0.5s ease; }
+    .anim2:hover { transform: rotate(360deg); transition: transform 1s ease; }
+    .anim3:hover { transform: scale(1.5); transition: transform 0.5s ease; }
+    .anim4:hover { opacity: 0.3; transition: opacity 0.5s ease; }
+    .anim5:hover { fill: orange; transition: fill 0.5s ease; }
+    .anim6 path {
+      transition: d 1s ease;
+    }
+    .anim6:hover path {
+      d: path("M10 80 Q 95 10 180 80 T 350 80");
+    }
+  </style>
+</head>
+<body>
+  <h1>SVG Animation Showcase</h1>
+  <div class="container">
+    <!-- Translate -->
+    <svg class="anim1" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="30" fill="tomato"/>
+    </svg>
+
+    <!-- Rotate -->
+    <svg class="anim2" viewBox="0 0 100 100">
+      <rect x="25" y="25" width="50" height="50" fill="mediumseagreen"/>
+    </svg>
+
+    <!-- Scale -->
+    <svg class="anim3" viewBox="0 0 100 100">
+      <polygon points="50,15 80,85 20,85" fill="royalblue"/>
+    </svg>
+
+    <!-- Opacity -->
+    <svg class="anim4" viewBox="0 0 100 100">
+      <ellipse cx="50" cy="50" rx="40" ry="25" fill="gold"/>
+    </svg>
+
+    <!-- Color Change -->
+    <svg class="anim5" viewBox="0 0 100 100">
+      <path d="M10 80 Q 95 10 180 80" stroke="black" stroke-width="2" fill="none"/>
+      <circle cx="50" cy="50" r="30" fill="purple"/>
+    </svg>
+
+    <!-- Path Morphing -->
+    <svg class="anim6" viewBox="0 0 400 100">
+      <path d="M10 80 Q 95 10 180 80 T 350 80" stroke="crimson" stroke-width="4" fill="none"/>
+    </svg>
+  </div>
+</body>
+</html>

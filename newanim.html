@@ -1,162 +1,500 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Cinematic Scroll + Autoplay + Selector</title>
-<style>
-:root{
-  --bg:#f7f7f7;
-  --box-bg:#fff;
-  --fade-duration:900ms;
-  --zoom-scale:1.05;
-  --close-size:44px;
-  --parallax-max:12;
-}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Centered Expansion — Random Imaginative Animations</title>
+  <style>
+    :root{
+      --bg:#fafafa;
+      --box-bg:#e8e8e8;
+      --anim-duration:520ms;
+      --close-size:44px;
+    }
+    *{box-sizing:border-box}
+    html,body { height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background:var(--bg);
+      color:#111;
+      /* 3D perspective for flip animations */
+      perspective:1200px;
+    }
 
-/* reset */
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:#111;overflow-x:hidden;scroll-behavior:smooth}
-body{perspective:1000px}
+    .spacer { height:100vh; display:flex; align-items:center; justify-content:center; color:#666; }
 
-/* Fixed animation selector */
-.anim-selector{
-  position:fixed;top:14px;right:14px;z-index:12010;
-  background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);
-  border:1px solid rgba(0,0,0,0.1);border-radius:10px;
-  padding:8px 12px;box-shadow:0 6px 24px rgba(0,0,0,0.15);
-  font-size:0.9rem;display:flex;align-items:center;gap:6px;
-}
-.anim-selector label{font-weight:600;color:#333;}
-.anim-selector select{
-  padding:4px 6px;border-radius:6px;border:1px solid #ccc;
-  background:#fff;cursor:pointer;font-size:0.9rem;
-}
+    .content {
+      min-height: 60vh;
+      margin: 48px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: var(--box-bg);
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+      padding: 28px;
+      text-align:center;
+      font-size: 1.1rem;
+      transition: none;
+      will-change: transform, left, top, width, height;
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+    }
 
-/* background */
-.bg-layer{
-  position:fixed;inset:0;z-index:-1;
-  background:radial-gradient(circle at 30% 40%,#d8eaff,#fefefe 70%);
-  background-size:200% 200%;
-  animation:bgDrift 25s ease-in-out infinite alternate;
-}
-@keyframes bgDrift{
-  0%{background-position:0% 0%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 100%}
-}
+    .inner { max-width: 900px; width:100%; display:flex; flex-direction:column; gap:18px; align-items:center; }
 
-/* sections */
-.spacer{height:100vh;display:flex;align-items:center;justify-content:center;color:#666;font-size:1.1rem;text-align:center;padding:0 16px}
-.content{
-  min-height:60vh;margin:48px 12px;display:flex;align-items:center;justify-content:center;
-  background:var(--box-bg);border-radius:14px;
-  box-shadow:0 12px 40px rgba(0,0,0,0.08);
-  padding:28px;text-align:center;overflow:hidden;position:relative;
-  opacity:0;transform:scale(1);
-  transition:opacity var(--fade-duration) ease,transform var(--fade-duration) ease;
-}
-.content:hover{transform:scale(1.02);transition:transform 0.3s ease;}
-.content.active{opacity:1;transform:scale(var(--zoom-scale));z-index:5;}
-.inner{max-width:900px;width:100%;display:flex;flex-direction:column;align-items:center;gap:18px;}
-.media{
-  width:100%;max-height:48vh;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.08);
-  display:block;object-fit:cover;opacity:0;
-  transform:translateY(10px) scale(0.98);
-}
-.caption{font-size:1rem;color:#333;margin-top:8px;opacity:0;transition:opacity 0.6s ease;}
-.content.active .caption{opacity:1}
+    .placeholder-svg,
+    .placeholder-video {
+      width: 100%;
+      max-height: 48vh;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      background: #f6f6f6;
+    }
 
-/* Animation presets */
-@keyframes fadeZoom{0%{opacity:0;transform:scale(0.95)}100%{opacity:1;transform:scale(1)}}
-@keyframes slideUp{0%{opacity:0;transform:translateY(40px)}100%{opacity:1;transform:translateY(0)}}
-@keyframes rotate3D{0%{opacity:0;transform:rotateY(30deg) scale(0.9)}100%{opacity:1;transform:rotateY(0deg) scale(1)}}
-@keyframes blurPop{0%{opacity:0;filter:blur(6px);transform:scale(0.9)}100%{opacity:1;filter:blur(0);transform:scale(1)}}
-@keyframes softLift{0%{opacity:0;transform:translateY(20px) scale(0.98)}100%{opacity:1;transform:translateY(0) scale(1.02)}}
-@keyframes cinematicZoom{
-  0%{opacity:0;transform:scale(0.98) translateY(8px) rotateX(2deg);filter:brightness(0.9) blur(2px);}
-  50%{opacity:1;transform:scale(1.02) translateY(-2px) rotateX(0.5deg);filter:brightness(1.05);}
-  100%{opacity:1;transform:scale(1) translateY(0) rotateX(0);filter:none;}
-}
+    .placeholder-video { object-fit: cover; }
 
-/* animated class */
-.media.animated{
-  animation-duration:1s;
-  animation-timing-function:cubic-bezier(.2,.9,.2,1);
-  animation-fill-mode:both;
-}
+    .caption { font-size: 1rem; color: #222; }
 
-/* smaller screens */
-@media(max-width:700px){
-  .media{max-height:40vh}
-  .content{min-height:50vh;padding:20px;margin:28px 10px}
-}
+    .content.visible { box-shadow: 0 12px 36px rgba(0,0,0,0.10); }
 
-/* close button */
-.exp-close{
-  position:fixed;right:18px;top:18px;width:var(--close-size);height:var(--close-size);
-  border-radius:8px;border:0;background:rgba(255,255,255,0.95);
-  box-shadow:0 8px 24px rgba(0,0,0,0.18);
-  display:flex;align-items:center;justify-content:center;
-  font-weight:600;cursor:pointer;z-index:12001;
-}
-</style>
+    .expanding { border-radius: 10px; }
+
+    .exp-close {
+      position: fixed;
+      right: 18px;
+      top: 18px;
+      width: var(--close-size);
+      height: var(--close-size);
+      border-radius: 8px;
+      border: 0;
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:600;
+      cursor:pointer;
+      z-index: 12001;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      :root { --anim-duration: 0ms; }
+      .content { transition: none !important; }
+    }
+
+    @media (max-width:700px){
+      .placeholder-svg, .placeholder-video { max-height: 40vh; }
+      .content { min-height: 50vh; padding: 20px; margin: 28px 10px; }
+    }
+
+    footer.note { text-align:center; color:#666; padding:18px; font-size:.95rem;}
+  </style>
 </head>
 <body>
+  <div class="spacer">Scroll down — sections expand with a random imaginative animation. Prefers-reduced-motion respected.</div>
 
-<!-- Fixed selector -->
-<div class="anim-selector" role="region" aria-label="Animation Selector">
-  <label for="animType">Animation:</label>
-  <select id="animType" aria-label="Choose animation">
-    <option value="fadeZoom">Fade + Zoom</option>
-    <option value="slideUp">Slide Up</option>
-    <option value="rotate3D">Rotate 3D</option>
-    <option value="blurPop">Blur Pop</option>
-    <option value="softLift">Soft Lift</option>
-    <option value="cinematicZoom" selected>Cinematic Zoom</option>
-  </select>
-</div>
+  <section class="content" id="c1">
+    <div class="inner">
+      <!-- SVG placeholder A -->
+      <svg class="placeholder-svg" role="img" aria-label="Placeholder image for Section A — abstract mountains" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs><linearGradient id="gA" x1="0" x2="1"><stop offset="0%" stop-color="#e0f7f1"/><stop offset="100%" stop-color="#a8e6dc"/></linearGradient></defs>
+        <rect width="1200" height="700" fill="url(#gA)"/>
+        <g transform="translate(80,380)" fill="#7fc5b6">
+          <path d="M0 220 L160 40 L310 220 Z"/>
+          <path d="M220 220 L390 80 L560 220 Z" fill="#6fb5a6"/>
+          <path d="M480 220 L720 20 L950 220 Z" fill="#5ea596"/>
+        </g>
+        <circle cx="980" cy="120" r="48" fill="#ffd27a" opacity="0.95"/>
+        <text x="50" y="90" font-family="system-ui, Arial" font-size="44" fill="#0b5a4a">Section A</text>
+      </svg>
+      <div class="caption"><strong>Section A</strong> — SVG placeholder (mountains).</div>
+    </div>
+  </section>
 
-<div class="bg-layer" id="bgLayer" aria-hidden="true"></div>
+  <section class="content" id="c2">
+    <div class="inner">
+      <!-- SVG placeholder B -->
+      <svg class="placeholder-svg" role="img" aria-label="Placeholder for Section B — geometric shapes" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs><linearGradient id="gB" x1="0" x2="1"><stop offset="0%" stop-color="#fff3e0"/><stop offset="100%" stop-color="#ffd9b3"/></linearGradient></defs>
+        <rect width="1200" height="700" fill="url(#gB)"/>
+        <g fill-opacity="0.95">
+          <rect x="120" y="120" width="340" height="260" rx="18" fill="#f4a261"/>
+          <circle cx="760" cy="230" r="120" fill="#e76f51"/>
+          <rect x="520" y="380" width="480" height="220" rx="24" fill="#2a9d8f"/>
+        </g>
+        <text x="60" y="92" font-family="system-ui, Arial" font-size="44" fill="#5a3a28">Section B</text>
+      </svg>
+      <div class="caption"><strong>Section B</strong> — SVG placeholder (geometric).</div>
+    </div>
+  </section>
 
-<div class="spacer">Scroll — cinematic fade + zoom + autoplay videos + parallax background ✨</div>
+  <section class="content" id="c3">
+    <div class="inner">
+      <!-- SVG placeholder C -->
+      <svg class="placeholder-svg" role="img" aria-label="Placeholder for Section C — device mockup" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs><linearGradient id="gC" x1="0" x2="1"><stop offset="0%" stop-color="#f0f6ff"/><stop offset="100%" stop-color="#d6e8ff"/></linearGradient></defs>
+        <rect width="1200" height="700" fill="url(#gC)"/>
+        <rect x="200" y="110" rx="28" ry="28" width="420" height="620" fill="#ffffff" stroke="#cfe3ff" stroke-width="6"/>
+        <rect x="600" y="150" rx="24" ry="24" width="360" height="540" fill="#0b78ff" opacity="0.09"/>
+        <g transform="translate(240,160)" fill="#7a92d6">
+          <rect width="360" height="36" rx="8"/>
+          <rect y="70" width="320" height="18" rx="6"/>
+          <rect y="110" width="320" height="18" rx="6"/>
+          <rect y="150" width="320" height="18" rx="6"/>
+        </g>
+        <text x="60" y="94" font-family="system-ui, Arial" font-size="44" fill="#274060">Section C</text>
+      </svg>
+      <div class="caption"><strong>Section C</strong> — SVG placeholder (device).</div>
+    </div>
+  </section>
 
-<section class="content" id="c1">
-  <div class="inner">
-    <svg class="media" viewBox="0 0 1200 700">
-      <rect width="1200" height="700" fill="#a8e6dc"/>
-      <text x="50" y="90" font-size="44" fill="#0b5a4a">Section A</text>
-    </svg>
-    <div class="caption"><strong>Section A</strong></div>
-  </div>
-</section>
+  <section class="content" id="c4">
+    <div class="inner">
+      <!-- Video placeholder D -->
+      <video
+        class="placeholder-video"
+        src="videos/0.mp4"
+        role="img"
+        aria-label="Video placeholder for Section D"
+        playsinline
+        muted
+        autoplay
+        loop
+        controls
+      ></video>
+      <div class="caption"><strong>Section D</strong> — Video (videos/0.mp4).</div>
+    </div>
+  </section>
 
-<section class="content" id="c2">
-  <div class="inner">
-    <svg class="media" viewBox="0 0 1200 700">
-      <rect width="1200" height="700" fill="#ffd9b3"/>
-      <text x="60" y="92" font-size="44" fill="#5a3a28">Section B</text>
-    </svg>
-    <div class="caption"><strong>Section B</strong></div>
-  </div>
-</section>
+  <div class="spacer"></div>
 
-<section class="content" id="c3">
-  <div class="inner">
-    <video class="media" src="videos/0.webm" muted playsinline loop preload="auto" onerror="this.src='videos/0.mp4'"></video>
-    <div class="caption"><strong>Section C</strong> — videos/0.webm</div>
-  </div>
-</section>
+  <footer class="note">Fun animations: the expansion picks one effect at random per open. Toggle reduced-motion in OS to see simpler behavior.</footer>
 
-<section class="content" id="c4">
-  <div class="inner">
-    <video class="media" src="videos/0.mp4" muted playsinline loop preload="auto"></video>
-    <div class="caption"><strong>Section D</strong> — videos/0.mp4</div>
-  </div>
-</section>
+  <script>
+  (function(){
+    const sections = Array.from(document.querySelectorAll('.content'));
+    const baseDuration = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--anim-duration')) || 520;
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-<div class="spacer"></div>
+    let currentlyExpanded = null;
+    let placeholder = null;
+    let closeBtn = null;
+    let isAnimating = false;
+    let currentAnimationName = null;
 
-<footer style="text-align:center;color:#666;padding:18px;font-size:0.9rem;">
-  Created by <a href="https://abc-videos.com" target="_blank" rel="noopener" style="color:#666;text-decoration:underline;">ABC-Videos.com</a>   
-</footer></body></html>
+    function ensureCloseButton() {
+      if (closeBtn) return;
+      closeBtn = document.createElement('button');
+      closeBtn.className = 'exp-close';
+      closeBtn.innerHTML = '✕';
+      closeBtn.title = 'Close';
+      document.body.appendChild(closeBtn);
+      closeBtn.addEventListener('click', () => { if (!isAnimating) shrinkCurrent(); });
+    }
+    function removeCloseButton() {
+      if (!closeBtn) return;
+      closeBtn.removeEventListener('click', shrinkCurrent);
+      if (closeBtn.parentNode) closeBtn.parentNode.removeChild(closeBtn);
+      closeBtn = null;
+    }
+
+    function fixElementAtRect(el, rect) {
+      el.style.position = 'fixed';
+      el.style.left = rect.left + 'px';
+      el.style.top = rect.top + 'px';
+      el.style.width = rect.width + 'px';
+      el.style.height = rect.height + 'px';
+      el.style.margin = '0';
+      el.style.zIndex = 12000;
+      el.classList.add('expanding');
+      el.style.transformOrigin = '50% 50%';
+      el.style.transformStyle = 'preserve-3d';
+      el.style.backfaceVisibility = 'hidden';
+    }
+
+    function restoreElement(el) {
+      el.style.position = '';
+      el.style.left = '';
+      el.style.top = '';
+      el.style.width = '';
+      el.style.height = '';
+      el.style.margin = '';
+      el.style.zIndex = '';
+      el.style.transform = '';
+      el.style.transition = '';
+      el.style.transformOrigin = '';
+      el.style.transformStyle = '';
+      el.style.backfaceVisibility = '';
+      el.classList.remove('expanding');
+    }
+
+    // Animation presets: each returns { initialTransform (optional), targetTransform } when given rect/vw/vh
+    const presets = [
+      {
+        name: 'center-scale', // neutral scale to center
+        get: (rect,vw,vh) => {
+          const scaleX = vw / rect.width, scaleY = vh / rect.height;
+          const tx = (vw/2) - (rect.left + rect.width/2);
+          const ty = (vh/2) - (rect.top + rect.height/2);
+          return { initial: null, target: `translate(${tx}px, ${ty}px) scale(${scaleX}, ${scaleY})`};
+        }
+      },
+      {
+        name: 'rotate-scale', // small rotate while scaling
+        get: (rect,vw,vh) => {
+          const angle = (Math.random()*24 - 12).toFixed(1); // -12..12 deg
+          const scaleX = vw / rect.width, scaleY = vh / rect.height;
+          const tx = (vw/2) - (rect.left + rect.width/2);
+          const ty = (vh/2) - (rect.top + rect.height/2);
+          return { initial: null, target: `translate(${tx}px, ${ty}px) scale(${scaleX}, ${scaleY}) rotate(${angle}deg)`};
+        }
+      },
+      {
+        name: 'flip-3d', // rotateY while scaling (3D flip)
+        get: (rect,vw,vh) => {
+          const scaleX = vw / rect.width, scaleY = vh / rect.height;
+          const tx = (vw/2) - (rect.left + rect.width/2);
+          const ty = (vh/2) - (rect.top + rect.height/2);
+          // start rotated -90deg (edge), animate to 0 with flip effect by using an initial transform
+          const initial = `rotateY(-90deg) translate(${tx}px, ${ty}px) scale(${0.8*scaleX}, ${0.8*scaleY})`;
+          const target = `translate(${tx}px, ${ty}px) scale(${scaleX}, ${scaleY}) rotateY(0deg)`;
+          return { initial, target };
+        }
+      },
+      {
+        name: 'slide-from-bottom', // element jumps from below while scaling to center
+        get: (rect,vw,vh) => {
+          const scaleX = vw / rect.width, scaleY = vh / rect.height;
+          const tx = (vw/2) - (rect.left + rect.width/2);
+          // start well below viewport center (translateY + vh*0.6)
+          const initial = `translate(${tx}px, ${vh*0.7}px) scale(${0.9}, ${0.9})`;
+          const target = `translate(${tx}px, ${(vh/2) - (rect.top + rect.height/2)}px) scale(${scaleX}, ${scaleY})`;
+          return { initial, target };
+        }
+      },
+      {
+        name: 'zoom-pan', // quick zoom and slight pan
+        get: (rect,vw,vh) => {
+          const extraZoom = 1.08 + Math.random()*0.12; // 1.08..1.2
+          const scaleX = (vw / rect.width) * extraZoom, scaleY = (vh / rect.height) * extraZoom;
+          const tx = (vw/2) - (rect.left + rect.width/2) + (Math.random()*80 - 40); // small random pan
+          const ty = (vh/2) - (rect.top + rect.height/2) + (Math.random()*60 - 30);
+          return { initial: null, target: `translate(${tx}px, ${ty}px) scale(${scaleX}, ${scaleY})`};
+        }
+      },
+      {
+        name: 'skew-spin',
+        get: (rect,vw,vh) => {
+          const spin = (Math.random()*360 - 180).toFixed(1); // -180..180
+          const skewX = (Math.random()*10 - 5).toFixed(1);
+          const scaleX = vw / rect.width, scaleY = vh / rect.height;
+          const tx = (vw/2) - (rect.left + rect.width/2);
+          const ty = (vh/2) - (rect.top + rect.height/2);
+          const initial = `skew(${skewX}deg, 0deg) scale(${0.9}, ${0.9})`;
+          const target = `translate(${tx}px, ${ty}px) scale(${scaleX}, ${scaleY}) rotate(${spin}deg) skew(0deg,0deg)`;
+          return { initial, target };
+        }
+      }
+    ];
+
+    function pickPreset() {
+      return presets[Math.floor(Math.random() * presets.length)];
+    }
+
+    // Expand a section, picking a random animation preset
+    function expandContent(section) {
+      return new Promise((resolve) => {
+        if (isAnimating) { resolve(); return; }
+        isAnimating = true;
+        ensureCloseButton();
+
+        const rect = section.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        placeholder = document.createElement('div');
+        placeholder.style.width = rect.width + 'px';
+        placeholder.style.height = rect.height + 'px';
+        placeholder.style.margin = getComputedStyle(section).margin;
+        section.parentNode.insertBefore(placeholder, section);
+
+        fixElementAtRect(section, rect);
+
+        // choose preset
+        const preset = prefersReduced ? presets[0] : pickPreset();
+        currentAnimationName = preset.name;
+
+        // compute transforms
+        const { initial, target } = preset.get(rect, vw, vh);
+
+        // slight random duration and easing for variety
+        const duration = baseDuration + Math.round(Math.random() * 240 - 120); // +/-120ms
+        const easings = [
+          'cubic-bezier(.22,.9,.35,1)',
+          'cubic-bezier(.17,.67,.32,1)',
+          'cubic-bezier(.2,.8,.25,1)',
+          'cubic-bezier(.25,.9,.5,1)'
+        ];
+        const easing = easings[Math.floor(Math.random()*easings.length)];
+
+        // If preset provides an initial transform, set it first (so animation goes from initial -> target)
+        if (initial) {
+          section.style.transform = initial;
+          // force paint then set transition
+          section.getBoundingClientRect();
+        }
+
+        section.style.transition = `transform ${duration}ms ${easing}`;
+        section.getBoundingClientRect();
+
+        if (prefersReduced) {
+          section.style.transform = target;
+          isAnimating = false;
+          currentlyExpanded = section;
+          resolve();
+          return;
+        }
+
+        // Listen for transition end
+        let called = false;
+        const fallback = setTimeout(() => {
+          if (!called) { called = true; afterEnd(); }
+        }, duration + 120);
+
+        function afterEnd() {
+          section.removeEventListener('transitionend', afterEnd);
+          clearTimeout(fallback);
+          isAnimating = false;
+          currentlyExpanded = section;
+          resolve();
+        }
+
+        section.addEventListener('transitionend', afterEnd, { once: true });
+
+        // start animation to target
+        requestAnimationFrame(() => {
+          section.style.transform = target;
+          if (closeBtn) closeBtn.focus();
+        });
+      });
+    }
+
+    // Shrink current expanded section
+    function shrinkCurrent() {
+      return new Promise((resolve) => {
+        if (!currentlyExpanded) { resolve(); return; }
+        if (isAnimating) { resolve(); return; }
+        isAnimating = true;
+        const section = currentlyExpanded;
+
+        // choose duration/easing similar to expand (small random)
+        const duration = baseDuration + Math.round(Math.random() * 240 - 120);
+        const easing = 'cubic-bezier(.22,.9,.35,1)';
+
+        section.style.transition = `transform ${duration}ms ${easing}`;
+
+        if (prefersReduced) {
+          restoreElement(section);
+          cleanupAfterShrink();
+          resolve();
+          return;
+        }
+
+        let called = false;
+        const fallback = setTimeout(() => {
+          if (!called) { called = true; afterEnd(); }
+        }, duration + 120);
+
+        function afterEnd() {
+          section.removeEventListener('transitionend', afterEnd);
+          clearTimeout(fallback);
+          restoreElement(section);
+          cleanupAfterShrink();
+          resolve();
+        }
+
+        section.addEventListener('transitionend', afterEnd, { once: true });
+
+        // animate back to identity
+        requestAnimationFrame(() => {
+          section.style.transform = 'none';
+        });
+      });
+    }
+
+    function cleanupAfterShrink() {
+      if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+      placeholder = null;
+      removeCloseButton();
+      currentlyExpanded = null;
+      isAnimating = false;
+      currentAnimationName = null;
+    }
+
+    // IntersectionObserver logic: expand visible section — replace currently open if needed
+    const obsOptions = { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.5 };
+    const observer = new IntersectionObserver(async (entries) => {
+      let best = null;
+      entries.forEach(e => {
+        if (!best || e.intersectionRatio > best.intersectionRatio) best = e;
+        if (e.isIntersecting && e.intersectionRatio >= obsOptions.threshold) e.target.classList.add('visible');
+        else e.target.classList.remove('visible');
+      });
+
+      if (!best) return;
+      if (best.isIntersecting && best.intersectionRatio >= obsOptions.threshold) {
+        const target = best.target;
+        if (currentlyExpanded === target) return;
+
+        if (currentlyExpanded && currentlyExpanded !== target) {
+          await shrinkCurrent();
+          await new Promise(r => requestAnimationFrame(r));
+        }
+
+        if (!currentlyExpanded) {
+          await expandContent(target);
+        }
+      }
+    }, obsOptions);
+
+    sections.forEach(s => observer.observe(s));
+
+    // Accessibility & controls
+    window.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && currentlyExpanded && !isAnimating) shrinkCurrent();
+    });
+
+    document.addEventListener('click', (ev) => {
+      if (!currentlyExpanded || isAnimating) return;
+      if (currentlyExpanded.contains(ev.target)) return;
+      if (closeBtn && closeBtn.contains(ev.target)) return;
+      shrinkCurrent();
+    }, true);
+
+    // On resize, recompute transform of current so center remains centered
+    window.addEventListener('resize', () => {
+      if (!currentlyExpanded || !placeholder) return;
+      // recompute transform for the active preset: simply center-scale to keep it stable
+      const section = currentlyExpanded;
+      const rect = placeholder.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const scaleX = vw / rect.width;
+      const scaleY = vh / rect.height;
+      const tx = (vw/2) - (rect.left + rect.width/2);
+      const ty = (vh/2) - (rect.top + rect.height/2);
+      section.style.transition = 'transform 0ms';
+      // still apply current animation style: for simplicity, align to center-scale target
+      section.style.transform = `translate(${tx}px, ${ty}px) scale(${scaleX}, ${scaleY})`;
+    });
+
+  })();
+  </script>
+</body>
+</html>
