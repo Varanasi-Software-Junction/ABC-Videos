@@ -1,0 +1,358 @@
+/* ============================================================
+   MERGED + CLEANED crx_styles_v1.css  (CORE UTILITIES ONLY)
+   + KashiFrame Website Styles
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   BASIC RESETS & NORMALIZATION  (kept from CRX)
+------------------------------------------------------------ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: Poppins, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ------------------------------------------------------------
+   SPACING UTILITIES (from CRX — trimmed)
+------------------------------------------------------------ */
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.p-1 { padding: 6px; }
+.p-2 { padding: 12px; }
+.p-3 { padding: 18px; }
+
+/* ------------------------------------------------------------
+   FLEX + GRID UTILITIES (from CRX — trimmed)
+------------------------------------------------------------ */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+
+.grid { display: grid; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.grid-3 { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+@media(max-width:768px){
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ------------------------------------------------------------
+   BUTTON UTILITIES (from CRX — kept)
+------------------------------------------------------------ */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  background:#ff8f5c;
+  color:#fff;
+  transition:.25s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  opacity: .92;
+}
+
+.btn.ghost {
+  background: transparent;
+  color: #b7410e;
+  border: 2px solid #b7410e22;
+}
+
+/* ------------------------------------------------------------
+   CARD UTILITY (from CRX — kept & simplified)
+------------------------------------------------------------ */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+}
+
+/* ------------------------------------------------------------
+   END OF CRX UTILITIES
+------------------------------------------------------------ */
+
+
+
+
+
+
+
+/* ============================================================
+   KASHIFRAME CINEMATIC WEBSITE STYLES
+   ------------------------------------------------------------
+   All styles below are custom and override CRX utilities.
+   These define your theme, hero, gallery, modal, etc.
+============================================================ */
+
+
+/* ----------------------
+   THEME VARIABLES
+---------------------- */
+:root {
+  --saffron: #b7410e;
+  --soft-saffron: #ffecd2;
+  --accent: #fcb69f;
+
+  --bg: #ffffff;
+  --panel: rgba(255,255,255,0.95);
+  --muted: #666666;
+  --text: #222222;
+
+  --container-max: 1100px;
+  --page-padding: 18px;
+
+  --radius-lg: 14px;
+  --radius-sm: 8px;
+  --card-shadow: 0 10px 30px rgba(11,11,11,0.06);
+
+  --ease-smooth: cubic-bezier(.2,.9,.2,1);
+}
+
+[data-theme="dark"] {
+  --bg: #0f0f12;
+  --panel: rgba(24,24,28,0.85);
+  --text: #eeeeee;
+  --muted: #bdbdbd;
+  --saffron: #ffb997;
+}
+
+/* ----------------------
+   GLOBAL + CONTAINER
+---------------------- */
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--page-padding);
+}
+
+/* ----------------------
+   NAVIGATION BAR
+---------------------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px var(--page-padding);
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+[data-theme="dark"] .nav {
+  background: rgba(10,10,10,0.45);
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--saffron);
+}
+
+/* ----------------------
+   THEME BUTTON
+---------------------- */
+.theme-toggle {
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.08);
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* ----------------------
+   HERO SECTION
+---------------------- */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.5) saturate(1.05);
+}
+
+.hero .overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.45));
+}
+
+.hero .content {
+  position: relative;
+  z-index: 2;
+  color: white;
+  padding: 20px;
+}
+
+.hero h1 {
+  font-size: clamp(1.6rem, 4vw, 3.2rem);
+  margin-bottom: 12px;
+}
+
+.typewrap {
+  display: inline-block;
+  white-space: nowrap;
+  border-right: 2px solid rgba(255,255,255,0.95);
+  padding-right: 6px;
+}
+
+/* ----------------------
+   CARDS
+---------------------- */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 36px rgba(11,11,11,0.08);
+}
+
+/* ----------------------
+   FOOTER
+---------------------- */
+footer {
+  padding: 36px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, var(--soft-saffron), var(--accent));
+  color: white;
+}
+
+footer a {
+  color: white;
+  text-decoration: underline;
+}
+
+/* ----------------------
+   MODAL
+---------------------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: 0.25s ease;
+  z-index: 200;
+}
+
+.modal.open {
+  visibility: visible;
+  opacity: 1;
+}
+
+.modal .panel {
+  background: var(--panel);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  padding: 20px;
+}
+
+/* ----------------------
+   GALLERY & EXPANDER
+---------------------- */
+.gallery-section {
+  position: relative;
+  padding: 60px 0;
+  margin-bottom: 120px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  transition: 800ms var(--ease-smooth);
+}
+
+.tile {
+  flex: 1 1 240px;
+  min-width: 220px;
+  background: #f6f6f6;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: 1s ease;
+}
+
+.tile img { transition: 1.2s ease; }
+.tile:hover img { transform: scale(1.06); }
+
+.row.active {
+  position: sticky;
+  top: 40px;
+  z-index: 40;
+  transform: scale(1.02);
+}
+
+/* Caption on scrolling */
+.row-caption {
+  position: fixed;
+  top: 20px;
+  right: 28px;
+  background: rgba(0,0,0,0.55);
+  padding: 12px 18px;
+  color: #fff;
+  border-radius: 10px;
+  opacity: 0;
+  transition: .45s ease;
+}
+
+.row-caption.show { opacity: 1; }
+
+/* ----------------------
+   RESPONSIVE SMALL
+---------------------- */
+@media(max-width: 640px){
+  .nav .menu { display: none; }
+  .hero { height: 60vh; }
+  .tile { flex: 1 1 100%; }
+}

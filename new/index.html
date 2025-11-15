@@ -1,0 +1,92 @@
+<!-- File: index.html (updated to use css/styles.css and js/scripts.js) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shadow Frames – Crafting Stories in the Heart of Varanasi</title>
+
+  <!-- original project stylesheet (kept) -->
+  <link rel="stylesheet" href="https://varanasi-software-junction.github.io/blogger/blogger-assets/crx_styles_v1.css">
+
+  <!-- local, centralized stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="logo">🎥 Shadow Frames</div>
+
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="menu" role="navigation" aria-label="Main navigation">
+        <a href="services.html">Services</a>
+        <a href="album.html">Album</a>
+        <a href="contact.html" id="open-contact">Contact</a>
+      </div>
+
+      <div class="tools">
+        <button id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Toggle light and dark theme">🌙</button>
+        <a href="https://wa.me/919335874326" class="btn" target="_blank">WhatsApp</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero" style="height:68vh;min-height:440px;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden">
+    <video autoplay muted loop playsinline poster="assets/hero.jpg">
+      <source src="assets/hero.mp4" type="video/mp4">
+    </video>
+    <div class="overlay" aria-hidden="true"></div>
+    <div class="content">
+      <h1><span class="typewrap" id="typed">Crafting Stories in the Heart of Varanasi</span></h1>
+      <p>We turn the ghats, rituals, and celebrations of Varanasi into cinematic films — emotional, authentic, and beautifully crafted.</p>
+      <div class="cta-row">
+        <a href="#services" class="btn">See Packages</a>
+        <a href="#contact" class="btn alt" id="open-contact-2">Schedule a Call</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="services" class="reveal container" style="margin-top: -60px">
+      <h2 style="color:var(--saffron);text-align:center;">✨ What We Offer</h2>
+      <div class="card-grid">
+        <div class="card"><h3>On-location Shoots</h3><p>Professional shooting across Varanasi’s iconic locations — ghats, temples, narrow lanes and more.</p></div>
+        <div class="card"><h3>Editing & Color</h3><p>Cinematic transitions, sound design and color grading to craft the mood of your story.</p></div>
+        <div class="card"><h3>Drone & Slow-mo</h3><p>High-impact aerials and slow motion for dramatic storytelling.</p></div>
+        <div class="card"><h3>Weddings & Events</h3><p>Full coverage packages with highlight films, long edits and social cuts.</p></div>
+        <div class="card"><h3>Documentaries</h3><p>Research-led long-form documentaries that respect local culture and nuance.</p></div>
+        <div class="card"><h3>Localization</h3><p>Multilingual voiceovers, subtitles and delivery for global audiences.</p></div>
+      </div>
+    </section>
+
+    <section id="why" class="reveal container" style="margin-top:40px">
+      <h2 style="color:var(--saffron);text-align:center">🌸 Why Choose Us</h2>
+      <p style="max-width:780px;margin:14px auto 0;">Deep cultural sensitivity, artistic direction that blends tradition with innovation, and a fast collaborative turnaround. Perfect for creators, brands and families who want their stories told with heart.</p>
+    </section>
+
+    <section class="quote reveal container">
+      <p style="max-width:820px;margin:auto">"Let your memories swirl like the Ganga — vivid, poetic, and eternal."</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>📍 Based in Varanasi | Capturing Emotions. Crafting Stories.</p>
+    <div style="margin-top:12px"><a href="https://wa.me/918299887999" target="_blank" class="contact-btn">Contact on WhatsApp</a></div>
+  </footer>
+
+  <!-- Contact modal -->
+  <div class="modal" id="contact-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="panel">
+      <h3>Get in touch</h3>
+      <form id="contact-form">
+        <div class="field"><label>Name<input type="text" name="name" required></label></div>
+        <div class="field"><label>Email<input type="email" name="email"></label></div>
+        <div class="field"><label>Message<textarea name="message" rows="4" required></textarea></label></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end"><button type="submit" class="btn">Send</button><button type="button" id="close-modal" class="btn alt">Close</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- centralized JS -->
+  <script src="js/scripts.js" defer></script>
+</body>
+</html>

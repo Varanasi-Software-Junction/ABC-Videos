@@ -1,0 +1,78 @@
+<!-- File: contact.html (updated to use css/styles.css and js/scripts.js) -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact — KashiFrame Studios</title>
+
+  <link rel="stylesheet" href="https://varanasi-software-junction.github.io/blogger/blogger-assets/crx_styles_v1.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a class="back" href="index.html">← Back to Home</a>
+      <h1>Contact KashiFrame Studios</h1>
+      <p style="max-width:780px">We’d love to hear about your project. Use the form below or reach us directly via WhatsApp, email or a quick call.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <!-- Left: Form -->
+      <div class="card">
+        <h3 style="margin-top:0">Get a Quote / Say Hello</h3>
+        <form id="contactForm">
+          <div class="row">
+            <div class="col">
+              <div class="field"><label for="name">Name</label><input id="name" name="name" required></div>
+            </div>
+            <div class="col">
+              <div class="field"><label for="phone">Phone (or WhatsApp)</label><input id="phone" name="phone"></div>
+            </div>
+          </div>
+
+          <div class="field"><label for="email">Email</label><input id="email" name="email" type="email"></div>
+          <div class="field"><label for="message">Tell us about your project</label><textarea id="message" name="message" required placeholder="Event date, location, style (wedding/travel/documentary), any reference links"></textarea></div>
+
+          <div style="display:flex;gap:10px;align-items:center">
+            <button type="submit" class="btn">Send via WhatsApp</button>
+            <button type="button" id="sendMail" class="btn ghost">Send Email</button>
+          </div>
+        </form>
+
+        <hr style="margin:18px 0;border:none;border-top:1px solid #f0f0f0">
+        <div class="meta">
+          <div><span class="label">WhatsApp:</span> <a href="https://wa.me/918299887999" target="_blank">+91 82998 87999</a></div>
+          <div><span class="label">Email:</span> <a href="mailto:info@kashiframe.studio">info@kashiframe.studio</a></div>
+          <div><span class="label">Location:</span> Varanasi, India</div>
+        </div>
+      </div>
+
+      <!-- Right: Map & Quick CTAs -->
+      <aside>
+        <div class="card" style="margin-bottom:18px">
+          <h4 style="margin-top:0">Quick Actions</h4>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <a class="btn" href="https://wa.me/918299887999?text=Hi%20KashiFrame,%20I%27d%20like%20a%20quote" target="_blank">Message on WhatsApp</a>
+            <a class="btn ghost" href="tel:+918299887999">Call Us</a>
+            <a class="btn ghost" href="mailto:info@kashiframe.studio">Email Us</a>
+          </div>
+        </div>
+
+        <div class="card map">
+          <iframe src="https://www.google.com/maps?q=Varanasi&amp;output=embed" width="100%" height="300" style="border:0" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <p>Prefer an in-person meet? Let us know your preferred date and we'll arrange a visit within Varanasi.</p>
+    </footer>
+  </main>
+
+  <!-- centralized JS -->
+  <script src="js/scripts.js" defer></script>
+</body>
+</html>
