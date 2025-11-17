@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intersection Observer – Animate Current Section</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #fff;
+        }
+
+        section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: bold;
+            opacity: 0.3;
+            transform: translateY(50px);
+            transition: all 0.8s ease-out;
+        }
+
+        /* This class is added only to the CURRENTLY visible section */
+        section.animate {
+            opacity: 1;
+            transform: translateY(0);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .sec1 {
+            background: #ff6b6b;
+        }
+
+        .sec2 {
+            background: #4ecdc4;
+        }
+
+        .sec3 {
+            background: #45b7d1;
+        }
+
+        .sec4 {
+            background: #f9ca24;
+        }
+
+        .sec5 {
+            background: #6c5ce7;
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="sec1">Section 1</section>
+    <section class="sec2">Section 2</section>
+    <section class="sec3">Section 3</section>
+    <section class="sec4">Section 4</section>
+    <section class="sec5">Section 5</section>
+
+    <script>
+        // Keep track of the previously animated element
+        let previousSection = null;
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (previousSection && previousSection !== entry.target) {
+                        previousSection.classList.remove('animate');
+                    }
+                    entry.target.classList.add('animate');
+                    previousSection = entry.target;
+                }
+            });
+        }, {
+            threshold: 0.5   // ← Ab 50 % visible hotei animation shuru!
+        });
+
+        // Observe all sections
+        document.querySelectorAll('section').forEach(sec => {
+            observer.observe(sec);
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,15 +1,10 @@
-<!-- File: index.html (updated to use css/styles.css and js/scripts.js) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shadow Frames – Crafting Stories in the Heart of Varanasi</title>
-
-  <!-- original project stylesheet (kept) -->
   <link rel="stylesheet" href="https://varanasi-software-junction.github.io/blogger/blogger-assets/crx_styles_v1.css">
-
-  <!-- local, centralized stylesheet -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -30,7 +25,7 @@
     </div>
   </nav>
 
-  <header class="hero" style="height:68vh;min-height:440px;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden">
+  <header class="hero">
     <video autoplay muted loop playsinline poster="assets/hero.jpg">
       <source src="assets/hero.mp4" type="video/mp4">
     </video>
@@ -46,7 +41,7 @@
   </header>
 
   <main>
-    <section id="services" class="reveal container" style="margin-top: -60px">
+    <section id="services" class="reveal">
       <h2 style="color:var(--saffron);text-align:center;">✨ What We Offer</h2>
       <div class="card-grid">
         <div class="card"><h3>On-location Shoots</h3><p>Professional shooting across Varanasi’s iconic locations — ghats, temples, narrow lanes and more.</p></div>
@@ -58,12 +53,12 @@
       </div>
     </section>
 
-    <section id="why" class="reveal container" style="margin-top:40px">
+    <section id="why" class="reveal" style="margin-top:40px">
       <h2 style="color:var(--saffron);text-align:center">🌸 Why Choose Us</h2>
       <p style="max-width:780px;margin:14px auto 0;">Deep cultural sensitivity, artistic direction that blends tradition with innovation, and a fast collaborative turnaround. Perfect for creators, brands and families who want their stories told with heart.</p>
     </section>
 
-    <section class="quote reveal container">
+    <section class="quote reveal">
       <p style="max-width:820px;margin:auto">"Let your memories swirl like the Ganga — vivid, poetic, and eternal."</p>
     </section>
   </main>
@@ -73,7 +68,6 @@
     <div style="margin-top:12px"><a href="https://wa.me/918299887999" target="_blank" class="contact-btn">Contact on WhatsApp</a></div>
   </footer>
 
-  <!-- Contact modal -->
   <div class="modal" id="contact-modal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="panel">
       <h3>Get in touch</h3>
@@ -86,7 +80,77 @@
     </div>
   </div>
 
-  <!-- centralized JS -->
-  <script src="js/scripts.js" defer></script>
+  <script>
+  function forEachNode(list, callback){Array.prototype.forEach.call(list, callback);}
+
+  // Smooth scroll
+  forEachNode(document.querySelectorAll('a[href^="#"]'), function(a){
+    a.addEventListener('click', function(e){
+      var target=document.querySelector(a.getAttribute('href'));
+      if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth',block:'start'});}
+    });
+  });
+
+  // Typewriter
+  (function(){
+    var el=document.getElementById('typed');
+    var phrases=['Crafting Stories in the Heart of Varanasi','Cinematic films with local soul','Weddings • Travel • Documentaries'];
+    var p=0,i=0,rev=false;
+    function step(){
+      var str=phrases[p];
+      if(!rev){i++;el.textContent=str.slice(0,i);if(i===str.length){rev=true;setTimeout(step,1200);return;}}
+      else{i--;el.textContent=str.slice(0,i);if(i===0){rev=false;p=(p+1)%phrases.length;}}
+      setTimeout(step,rev?40:60);
+    }
+    step();
+  })();
+
+  // Reveal
+  var obs=new IntersectionObserver(function(entries)
+  {entries.forEach(function(en)
+    {if(en.isIntersecting)
+{
+      en.target.classList.add('visible');
+}
+    });},{threshold:0.12});
+  forEachNode(document.querySelectorAll('.reveal'),function(n){obs.observe(n);});
+
+  // Modal
+  var modal=document.getElementById('contact-modal');
+  var openBtns=[document.getElementById('open-contact'),document.getElementById('open-contact-2')].filter(Boolean);
+  forEachNode(openBtns,function(b){b.addEventListener('click',function(e){e.preventDefault();modal.classList.add('open');modal.setAttribute('aria-hidden','false');});});
+  document.getElementById('close-modal').addEventListener('click',function(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');});
+  modal.addEventListener('click',function(e){if(e.target===modal){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');}});
+
+  // Form
+  document.getElementById('contact-form').addEventListener('submit',function(e){
+    e.preventDefault();var data=new FormData(this);
+    var msg=encodeURIComponent('Hi, I\'m '+data.get('name')+' — '+data.get('message'));
+    window.open('https://wa.me/918299887999?text='+msg,'_blank');
+    modal.classList.remove('open');modal.setAttribute('aria-hidden','true');
+  });
+
+  // Theme toggle (light/dark) — persists to localStorage
+  (function(){
+    var toggle=document.getElementById('theme-toggle');
+    var root=document.documentElement;
+    var key='kashi-theme';
+    function applyTheme(theme){
+      if(theme==='dark'){ root.setAttribute('data-theme','dark'); toggle.textContent='☀️'; toggle.setAttribute('aria-pressed','true'); }
+      else { root.removeAttribute('data-theme'); toggle.textContent='🌙'; toggle.setAttribute('aria-pressed','false'); }
+    }
+    // Init: prefer saved -> prefers-color-scheme -> light
+    var saved = localStorage.getItem(key);
+    if(saved){ applyTheme(saved); }
+    else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ applyTheme('dark'); }
+    else { applyTheme('light'); }
+
+    toggle.addEventListener('click', function(){
+      var now = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(now);
+      localStorage.setItem(key, now);
+    });
+  })();
+  </script>
 </body>
 </html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Intersection Observer – Animate Current Section (with mini-heroes)</title>
+
+  <!-- External theme (kept) and local styles -->
+  <link rel="stylesheet" href="https://varanasi-software-junction.github.io/blogger/blogger-assets/crx_styles_v1.css">
+  <style>
+
+    .loadvideo {
+      width: 100px;
+      height: 50px;
+      background-color: red;
+      font-weight: bold;
+      position: relative;
+      animation-delay: 5s;
+      animation-name: myAnimation;
+      animation-duration: 20s;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes myAnimation {
+      0% {
+        left: 0px;
+        width: 100%;
+        border-radius: 0%;
+        transform: rotateX(0deg) rotateY(0deg);
+      }
+
+      50% {
+        left: 50%;
+        width: 0%;
+        border-radius: 50%;
+      }
+
+      100% {
+        left: 0%;
+        width: 100%;
+        border-radius: 0%;
+        transform: rotateX(360deg) rotateY(360deg);
+      }
+    }
+
+    /* --- base page styles (inlined for demo) --- */
+    :root {
+      --bg: #111;
+      --text: #fff;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* sections */
+    section {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      font-weight: bold;
+      opacity: 0.3;
+      transform: translateY(50px);
+      transition: all 0.8s ease-out;
+      position: relative;
+      overflow: hidden;
+      animation-delay: 5s;
+      animation-name: myAnimation;
+      animation-duration: 20s;
+      animation-fill-mode: forwards;
+    }
+
+    /* animated active section */
+    section.animate {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* colored backgrounds as before */
+    .sec1 { background: #ff6b6b; }
+    .sec2 { background: #4ecdc4; }
+    .sec3 { background: #45b7d1; }
+    .sec4 { background: #f9ca24; }
+    .sec5 { background: #6c5ce7; }
+
+    /* --- mini-hero styles (scaled down for use inside sections) --- */
+    .mini-hero {
+      width: 100%;
+      max-width: 1100px;
+      height: 70vh;
+      min-height: 380px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: center;
+      justify-items: center;
+      background: #000;
+    }
+
+    /* video fits the hero area */
+    .mini-hero video,
+    .mini-hero .poster-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    .mini-hero .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.55));
+      pointer-events: none;
+    }
+
+    .mini-hero .content {
+      position: relative;
+      z-index: 5;
+      padding: 28px;
+      text-align: center;
+      color: #fff;
+      max-width: 86%;
+    }
+    .mini-hero h2 {
+      margin: 0 0 8px 0;
+      font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+      line-height: 1.05;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .mini-hero p {
+      margin: 0 0 12px 0;
+      font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+      opacity: 0.95;
+    }
+
+    .cta-row { display:flex; gap:10px; justify-content:center; margin-top:10px; }
+    .btn { padding:8px 14px; border-radius:8px; background:rgba(255,255,255,0.12); color:#fff; text-decoration:none; font-weight:600; }
+    .btn.alt { background: rgba(255,255,255,0.22); }
+
+    /* typed text */
+    .typed { display:inline-block; white-space:nowrap; }
+
+    /* small responsive tweaks */
+    @media (max-width: 900px) {
+      section { font-size: 2.6rem; }
+      .mini-hero { height: 58vh; min-height: 300px; }
+    }
+
+    /* focus styles for accessibility */
+    .btn:focus, .theme-toggle:focus { outline: 3px solid rgba(100,150,255,0.6); outline-offset: 3px; }
+
+    /* small hero-specific adjustments (make hero text slightly brighter) */
+    .mini-hero .content h2, .mini-hero .content p { text-shadow: 0 6px 18px rgba(0,0,0,0.6); }
+
+  </style>
+</head>
+<body>
+
+  <!-- Top-level nav + theme toggle (single, global) -->
+  <nav style="position:fixed;left:12px;top:12px;z-index:9999;display:flex;gap:10px;align-items:center">
+    <div style="color:#fff;font-weight:700">🎥 Shadow Frames</div>
+    <button id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Toggle dark theme" style="border-radius:8px;padding:6px 8px;">🌙</button>
+    <a href="https://wa.me/919335874326" class="btn" target="_blank" rel="noopener noreferrer" style="padding:6px 8px;">WhatsApp</a>
+  </nav>
+
+  <!-- Sections: place mini-hero inside alternate ones (1,3,5) -->
+  <section class="sec1">
+    <div class="mini-hero" data-hero data-phrases='["Crafting Stories in the Heart of Varanasi","Cinematic films with local soul","Weddings • Travel • Documentaries"]'>
+      <!-- hero video (lazy source as before) -->
+      <video class="hero-video" autoplay muted loop playsinline poster="assets/hero.jpg" preload="metadata" aria-hidden="true">
+        <source data-src="assets/hero.mp4" type="video/mp4">
+      </video>
+      <div class="overlay" aria-hidden="true"></div>
+
+      <!-- header-like content inserted into mini-hero -->
+      <div class="content">
+        <h2><span class="typed" aria-live="polite">Crafting Stories in the Heart of Varanasi</span></h2>
+        <p>We turn the ghats, rituals, and celebrations of Varanasi into cinematic films — emotional, authentic, and beautifully crafted.</p>
+        <div class="cta-row">
+          <a href="#" class="btn">See Packages</a>
+          <a href="#" class="btn alt">Schedule a Call</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec2">Section 2</section>
+
+  <section class="sec3">
+    <div class="mini-hero" data-hero data-phrases='["Cinematic films with local soul","Weddings • Travel • Documentaries","Crafting Stories in the Heart of Varanasi"]'>
+      <video class="hero-video" autoplay muted loop playsinline poster="assets/hero.jpg" preload="metadata" aria-hidden="true">
+        <source data-src="assets/hero.mp4" type="video/mp4">
+      </video>
+      <div class="overlay" aria-hidden="true"></div>
+
+      <div class="content">
+        <h2><span class="typed" aria-live="polite">Cinematic films with local soul</span></h2>
+        <p>We craft honest, emotional films that celebrate place and people.</p>
+        <div class="cta-row">
+          <a href="#" class="btn">See Packages</a>
+          <a href="#" class="btn alt">Schedule a Call</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec4">Section 4</section>
+
+  <section class="sec5">
+    <div class="mini-hero" data-hero data-phrases='["Weddings • Travel • Documentaries","Crafting Stories in the Heart of Varanasi","Cinematic films with local soul"]'>
+      <video class="hero-video" autoplay muted loop playsinline poster="assets/hero.jpg" preload="metadata" aria-hidden="true">
+        <source data-src="assets/hero.mp4" type="video/mp4">
+      </video>
+      <div class="overlay" aria-hidden="true"></div>
+
+      <div class="content">
+        <h2><span class="typed" aria-live="polite">Weddings • Travel • Documentaries</span></h2>
+        <p>Turn rituals and celebrations into cinematic stories.</p>
+        <div class="cta-row">
+          <a href="#" class="btn">See Packages</a>
+          <a href="#" class="btn alt">Schedule a Call</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /********** IntersectionObserver: single active section **********/
+    let previousSection = null;
+
+    // observer callback: highlights current section and handles hero activation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          if (previousSection && previousSection !== entry.target) {
+            previousSection.classList.remove('animate');
+            // deactivate hero inside previous
+            deactivateHero(previousSection);
+          }
+          entry.target.classList.add('animate');
+          // entry.target.classList.add("loadvideo");
+          activateHero(entry.target);
+          previousSection = entry.target;
+        }
+      });
+    }, {
+      threshold: 0.5
+    });
+
+    document.querySelectorAll('section').forEach(sec => observer.observe(sec));
+
+
+    /********** Hero activation helpers **********/
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function activateHero(sectionEl) {
+      const hero = sectionEl.querySelector('[data-hero]');
+      if (!hero) return;
+
+      // 1) lazy-load and play video (only when active)
+      const video = hero.querySelector('.hero-video');
+      if (video) {
+        const srcEl = video.querySelector('source[data-src]');
+        if (srcEl && !srcEl.getAttribute('src')) {
+          // set real src and load
+          srcEl.setAttribute('src', srcEl.dataset.src);
+          // trigger load; playing may be blocked by browser if not muted — it's muted here
+          video.load();
+          // only play if not reduced motion
+          if (!reduceMotion) {
+            const p = video.play();
+            if (p && p.catch) p.catch(() => { /* autoplay blocked — fine */ });
+          } else {
+            // if reduced motion, pause and don't play
+            try { video.pause(); } catch(e){}
+          }
+        } else {
+          // if already has src, ensure it's playing (unless reduced motion)
+          if (!reduceMotion) {
+            const p = video.play();
+            if (p && p.catch) p.catch(() => {});
+          } else {
+            try { video.pause(); } catch(e){}
+          }
+        }
+      }
+
+      // 2) start typewriter for typed element inside this hero
+      startTypewriterForHero(hero);
+    }
+
+    function deactivateHero(sectionEl) {
+      const hero = sectionEl.querySelector('[data-hero]');
+      if (!hero) return;
+
+      // pause video to save CPU
+      const video = hero.querySelector('.hero-video');
+      if (video && !video.paused) {
+        try { video.pause(); } catch(e){}
+      }
+
+      // stop any running typewriter for this hero
+      stopTypewriterForHero(hero);
+    }
+
+    /********** Typewriter: per-hero instances (class-based) **********/
+    // default fallback phrases (used if no data-phrases provided)
+    const defaultPhrases = [
+      'Crafting Stories in the Heart of Varanasi',
+      'Cinematic films with local soul',
+      'Weddings • Travel • Documentaries'
+    ];
+
+    // Keep references for active typewriters for stop/resume
+    const heroTypewriters = new WeakMap();
+
+    function startTypewriterForHero(heroEl) {
+      const typedEl = heroEl.querySelector('.typed');
+      if (!typedEl) return;
+
+      // if already running, don't start another
+      if (heroTypewriters.has(heroEl)) return;
+
+      // If user prefers reduced motion, just show first phrase
+      if (reduceMotion) {
+        typedEl.textContent = defaultPhrases[0];
+        return;
+      }
+
+      // We'll optionally allow per-hero phrases via data-phrases attribute (JSON or comma-separated)
+      let phrases = defaultPhrases;
+      const dp = heroEl.getAttribute('data-phrases');
+      if (dp) {
+        try { phrases = JSON.parse(dp); }
+        catch(e) { phrases = dp.split(',').map(s => s.trim()).filter(Boolean) || defaultPhrases; }
+      }
+
+      let p = 0, i = 0, rev = false, timeoutId = null;
+      function step(){
+        const str = phrases[p];
+        if (!rev) {
+          i++;
+          typedEl.textContent = str.slice(0, i);
+          if (i === str.length) { rev = true; timeoutId = setTimeout(step, 1200); return; }
+        } else {
+          i--;
+          typedEl.textContent = str.slice(0, i);
+          if (i === 0) { rev = false; p = (p + 1) % phrases.length; }
+        }
+        timeoutId = setTimeout(step, rev ? 40 : 60);
+      }
+      step();
+
+      heroTypewriters.set(heroEl, {stop: () => { if (timeoutId) clearTimeout(timeoutId); timeoutId = null; }});
+    }
+
+    function stopTypewriterForHero(heroEl) {
+      const obj = heroTypewriters.get(heroEl);
+      if (obj && obj.stop) obj.stop();
+      heroTypewriters.delete(heroEl);
+      // optionally leave the typed text as the full first phrase
+      const typedEl = heroEl.querySelector('.typed');
+      if (typedEl) typedEl.textContent = defaultPhrases[0];
+    }
+
+    // On page load, reserve reduced-motion handling: pause all videos if necessary
+    document.addEventListener('DOMContentLoaded', function(){
+      if (reduceMotion) {
+        document.querySelectorAll('.mini-hero .hero-video').forEach(v => {
+          try { v.pause(); } catch(e){}
+        });
+      }
+    });
+
+
+    /********** Theme toggle (global) **********/
+    (function(){
+      var toggle = document.getElementById('theme-toggle');
+      var root = document.documentElement;
+      var key = 'kashi-theme';
+
+      function applyTheme(theme) {
+        if (theme === 'dark') {
+          root.setAttribute('data-theme', 'dark');
+          toggle.textContent = '☀️';
+          toggle.setAttribute('aria-pressed', 'true');
+          toggle.setAttribute('aria-label', 'Switch to light theme');
+        } else {
+          root.removeAttribute('data-theme');
+          toggle.textContent = '🌙';
+          toggle.setAttribute('aria-pressed', 'false');
+          toggle.setAttribute('aria-label', 'Switch to dark theme');
+        }
+      }
+
+      var saved = localStorage.getItem(key);
+      if (saved) { applyTheme(saved); }
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches) { applyTheme('dark'); }
+      else { applyTheme('light'); }
+
+      toggle.addEventListener('click', function(){
+        var now = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(now);
+        localStorage.setItem(key, now);
+      });
+
+      toggle.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle.click(); }
+      });
+    })();
+  </script>
+</body>
+</html>

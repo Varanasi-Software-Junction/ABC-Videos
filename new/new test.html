@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sections with Video - Play & Animate on Scroll</title>
+  <style>
+    :root {
+      --overlay: rgba(0,0,0,0.35);
+      --text-size: 3.5rem;
+    }
+
+    html,body { height:100%; margin:0; font-family: Arial, sans-serif; background:#000; color:#fff; }
+    section {
+      position: relative;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      text-align:center;
+      padding:2rem;
+      box-sizing:border-box;
+      transition: opacity .7s ease, transform .7s ease;
+      opacity: .3;
+      transform: translateY(50px);
+    }
+    section.animate { opacity:1; transform: translateY(0); }
+
+    /* common section text */
+    section .label {
+      position: relative;
+      z-index: 3;
+      font-size: var(--text-size);
+      font-weight:700;
+      text-shadow: 0 6px 18px rgba(0,0,0,.6);
+      pointer-events:none;
+    }
+
+    /* video container & video styling */
+    .with-video { background: #111; }
+    .with-video::before {
+      /* soft dark overlay */
+      content:"";
+      position:absolute;
+      inset:0;
+      background: var(--overlay);
+      z-index:1;
+      transition: background .6s ease;
+    }
+
+    /* video element sits behind content */
+    .with-video video {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      z-index:0;
+      transform: scale(1);
+      opacity: .88;
+      filter: brightness(.85) blur(1px);
+      transition: transform .9s cubic-bezier(.2,.9,.3,1), filter .7s ease, opacity .6s ease;
+      will-change: transform, filter, opacity;
+      pointer-events:none;
+    }
+
+    /* active video state (animates to clear & slightly scaled) */
+    .with-video video.video-active {
+      transform: scale(1.06);
+      filter: brightness(1) blur(0);
+      opacity: 1;
+    }
+
+    /* simple color sections without video */
+    .sec1 { background: linear-gradient(135deg,#ff6b6b,#ff8a80); }
+    .sec3 { background: linear-gradient(135deg,#45b7d1,#2ec4b6); }
+    .sec5 { background: linear-gradient(135deg,#6c5ce7,#8e7dff); }
+
+    /* small responsive tweak */
+    @media (max-width:720px) {
+      :root { --text-size: 2.2rem; }
+      section { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="sec1">
+    <div class="label">Section 1 — Static</div>
+  </section>
+
+  <section class="with-video sec2">
+    <!-- keep autoplay muted loop playsinline so muted autoplay works on mobile -->
+    <video autoplay muted loop playsinline preload="auto" poster="assets/hero.jpg">
+      <source src="assets/hero.mp4" type="video/mp4">
+    </video>
+    <div class="label">Section 2 — Video (animates when visible)</div>
+  </section>
+
+  <section class="sec3">
+    <div class="label">Section 3 — Static</div>
+  </section>
+
+  <section class="with-video sec4">
+    <video autoplay muted loop playsinline preload="auto" poster="assets/hero.jpg">
+      <source src="assets/hero.mp4" type="video/mp4">
+    </video>
+    <div class="label">Section 4 — Video (animates when visible)</div>
+  </section>
+
+  <section class="sec5">
+    <div class="label">Section 5 — Static</div>
+  </section>
+
+  <script>
+    // Observe sections and keep only the currently-focused one animated.
+    let activeSection = null;
+
+    // Helper: try play with a promise guard
+    function tryPlay(video){
+      if(!video) return;
+      const p = video.play();
+      if(p !== undefined) p.catch(()=>{ /* autoplay blocked — it's muted so unlikely */ });
+    }
+    function tryPause(video){
+      if(!video) return;
+      try { video.pause(); } catch(e) {}
+    }
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const sec = entry.target;
+        const vid = sec.querySelector('video');
+
+        if(entry.isIntersecting && entry.intersectionRatio >= 0.55){
+          // Mark section visible (text animation)
+          if(activeSection && activeSection !== sec){
+            activeSection.classList.remove('animate');
+            // If old active had a video — stop its animated state and pause
+            const oldVid = activeSection.querySelector('video');
+            if(oldVid){ oldVid.classList.remove('video-active'); tryPause(oldVid); }
+          }
+
+          sec.classList.add('animate');
+          // If this section contains a video, activate its video animation & play
+          if(vid){
+            vid.classList.add('video-active');
+            tryPlay(vid);
+          }
+
+          activeSection = sec;
+        } else {
+          // If section leaves visibility enough, remove its animate class.
+          // (The "active" removal is handled above when a new one becomes active,
+          //  but this covers the case when user scrolls fast away)
+          sec.classList.remove('animate');
+          if(vid){
+            vid.classList.remove('video-active');
+            tryPause(vid);
+          }
+          if(activeSection === sec) activeSection = null;
+        }
+      });
+    }, {
+      threshold: [0, 0.25, 0.55, 0.75] // we care when it crosses ~55%
+    });
+
+    // Start observing all sections
+    document.querySelectorAll('section').forEach(s => io.observe(s));
+
+    // Optional: when page becomes hidden, pause all videos to save CPU/battery
+    document.addEventListener('visibilitychange', () => {
+      document.querySelectorAll('video').forEach(v => {
+        if(document.hidden) tryPause(v);
+        else {
+          // play only videos that currently have .video-active (visible)
+          if(v.classList.contains('video-active')) tryPlay(v);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
