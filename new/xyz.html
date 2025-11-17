@@ -9,16 +9,14 @@
   <link rel="stylesheet" href="https://varanasi-software-junction.github.io/blogger/blogger-assets/crx_styles_v1.css">
   <style>
 
+    /* kept for reference; no longer auto-applied to sections */
     .loadvideo {
       width: 100px;
       height: 50px;
       background-color: red;
       font-weight: bold;
       position: relative;
-      animation-delay: 5s;
-      animation-name: myAnimation;
-      animation-duration: 20s;
-      animation-fill-mode: forwards;
+      /* animation removed here so it won't run globally */
     }
 
     @keyframes myAnimation {
@@ -55,7 +53,7 @@
       color: var(--text);
     }
 
-    /* sections */
+    /* sections (animation removed so section itself doesn't run keyframes) */
     section {
       height: 100vh;
       display: flex;
@@ -68,16 +66,32 @@
       transition: all 0.8s ease-out;
       position: relative;
       overflow: hidden;
-      animation-delay: 5s;
-      animation-name: myAnimation;
-      animation-duration: 20s;
-      animation-fill-mode: forwards;
     }
 
     /* animated active section */
     section.animate {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    /* ----- <--- IMPORTANT: animation now applies only to the video when the section is active ----> */
+    /* when a section has .animate, animate the video inside it */
+    section.animate .hero-video {
+      /* apply the keyframes only to the video when its section is active */
+      animation-name: myAnimation;
+      animation-duration: 20s;
+      animation-delay: 5s;
+      animation-fill-mode: forwards;
+      /* you can also control iteration, easing etc. if you want */
+      /* example: animation-timing-function: ease-in-out; */
+    }
+
+    /* Respect user's reduced-motion preference: disable the animation entirely */
+    @media (prefers-reduced-motion: reduce) {
+      section.animate .hero-video {
+        animation: none !important;
+        /* also pause autoplay videos for reduced motion users — handled by JS, but good to be explicit */
+      }
     }
 
     /* colored backgrounds as before */
@@ -248,7 +262,6 @@
             deactivateHero(previousSection);
           }
           entry.target.classList.add('animate');
-          // entry.target.classList.add("loadvideo");
           activateHero(entry.target);
           previousSection = entry.target;
         }
@@ -314,30 +327,25 @@
     }
 
     /********** Typewriter: per-hero instances (class-based) **********/
-    // default fallback phrases (used if no data-phrases provided)
     const defaultPhrases = [
       'Crafting Stories in the Heart of Varanasi',
       'Cinematic films with local soul',
       'Weddings • Travel • Documentaries'
     ];
 
-    // Keep references for active typewriters for stop/resume
     const heroTypewriters = new WeakMap();
 
     function startTypewriterForHero(heroEl) {
       const typedEl = heroEl.querySelector('.typed');
       if (!typedEl) return;
 
-      // if already running, don't start another
       if (heroTypewriters.has(heroEl)) return;
 
-      // If user prefers reduced motion, just show first phrase
       if (reduceMotion) {
         typedEl.textContent = defaultPhrases[0];
         return;
       }
 
-      // We'll optionally allow per-hero phrases via data-phrases attribute (JSON or comma-separated)
       let phrases = defaultPhrases;
       const dp = heroEl.getAttribute('data-phrases');
       if (dp) {
@@ -368,7 +376,6 @@
       const obj = heroTypewriters.get(heroEl);
       if (obj && obj.stop) obj.stop();
       heroTypewriters.delete(heroEl);
-      // optionally leave the typed text as the full first phrase
       const typedEl = heroEl.querySelector('.typed');
       if (typedEl) typedEl.textContent = defaultPhrases[0];
     }
